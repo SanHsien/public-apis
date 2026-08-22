@@ -31,12 +31,12 @@
 
 ## 開發原則
 
-- 一般修改使用 **branch → PR → CI → merge**，不要直接在 `master` 做正常維護。
+- 一般修改直接在 `master` 提交並 `git push origin master`。不要開 feature branch，也不要為本 fork 開 PR。
 - 修 bug 先補可重現失敗測試，再做最小修正。
 - 上游公開目錄格式、`CONTRIBUTING.md` 與 `scripts/validate/` 視為相容性契約。
 - 不為了套格式而大改上游程式；Ruff 只閘本 fork 的 `tests/` 與 `tools/`（E9 + F）。上游 `scripts/` 的 F541／F401 留給上游。
 - 使用繁體中文回覆；維護文件用繁中。目錄本體維持英文。
-- PR 標題建議 Conventional Commit；合併前先讀 `gh pr diff <編號>`。
+- 提交訊息建議 Conventional Commit。
 - `REVIEW.md` 是風險快照，不是每個一般 bug 的流水帳。
 
 ## 上游處理

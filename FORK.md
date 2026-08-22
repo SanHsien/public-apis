@@ -29,9 +29,9 @@
 
 ## 分支與 remote
 
-- `origin/master`：SanHsien 維護線。
+- `origin/master`：SanHsien 維護線。一般修改直接推這裡。
 - `upstream/master`：public-apis 原始專案。
-- 功能與修正使用短期分支；驗證通過後再合併到 `master`。
+- 不要開 feature branch、不要為本 fork 開 PR。
 
 不要 `git push upstream`。同步方式見 [`docs/UPSTREAM.md`](docs/UPSTREAM.md)。
 

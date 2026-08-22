@@ -28,3 +28,10 @@
 
 **理由**：那些不是本 fork 維護骨架的缺陷，改了會跟上游目錄或 3.8 CI 契約打架。
 
+## 2026-08-22：直接推 `master`，不開 feature branch
+
+**決定**：本 fork 的日常修改在 `master` 提交後直接 `git push origin master`。不開短期分支、不為本 fork 開 PR。預設分支名稱維持 `master`，與上游一致，不改名成 `main`。
+
+**理由**：這是一人維護的目錄 fork；功能分支與 PR 的成本高過收益。CI 已在 `push` 到 `master` 時跑。改名 `main` 會讓每次上游同步都多一層摩擦。
+
+
