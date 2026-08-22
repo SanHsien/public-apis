@@ -66,7 +66,9 @@ def test_check_links_rejects_path_outside_repo(tmp_path: Path) -> None:
 
 
 def test_non_fork_workflows_have_repo_guard() -> None:
-    fork_owned = {"ci.yml", "upstream-check.yml"}
+    # 本 fork 自己新增的 workflow：它們本來就只該在這個 fork 跑，
+    # 不需要（也不該有）擋上游 repo 的 guard。
+    fork_owned = {"ci.yml", "upstream-check.yml", "codeql.yml", "dependency-freshness.yml"}
     workflows = ROOT / ".github" / "workflows"
     scanned = 0
     for path in sorted(workflows.glob("*.yml")):
