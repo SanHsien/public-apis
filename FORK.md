@@ -29,9 +29,10 @@
 
 ## 分支與 remote
 
-- `origin/master`：SanHsien 維護線。一般修改直接推這裡。
+- `origin/master`：SanHsien 維護主線。
 - `upstream/master`：public-apis 原始專案。
-- 不要開 feature branch、不要為本 fork 開 PR。
+- 一般修改從 `master` 建短期 branch，開 PR、讀完整 diff，等既有 CI / CodeQL 通過後再 squash merge 回主線。
+- 不直接推進主線，也不要把 fork-only 的維護差異送到 upstream。
 
 不要 `git push upstream`。同步方式見 [`docs/UPSTREAM.md`](docs/UPSTREAM.md)。
 
