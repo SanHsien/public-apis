@@ -24,9 +24,14 @@ num_segments = 5
 min_entries_per_category = 3
 max_description_length = 100
 
-anchor_re = re.compile(anchor + '\s(.+)')
-category_title_in_index_re = re.compile('\*\s\[(.*)\]')
-link_re = re.compile('\[(.+)\]\((http.*)\)')
+# Raw strings: '\s' and '\[' are not valid Python escapes, so 3.12 warns on
+# every run and a future release turns that into a SyntaxError. Taken from
+# upstream PR #6955 (public-apis/public-apis), which also wraps the anchor in
+# re.escape so a future anchor containing a regex metacharacter cannot silently
+# change what this matches.
+anchor_re = re.compile(re.escape(anchor) + r'\s(.+)')
+category_title_in_index_re = re.compile(r'\*\s\[(.*)\]')
+link_re = re.compile(r'\[(.+)\]\((http.*)\)')
 
 # Type aliases
 APIList = List[str]
@@ -254,7 +259,7 @@ def check_file_format(lines: List[str]) -> List[str]:
 def main(filename: str) -> None:
 
     with open(filename, mode='r', encoding='utf-8') as file:
-        lines = list(line.rstrip() for line in file)
+        lines = [line.rstrip() for line in file]
 
     file_format_err_msgs = check_file_format(lines)
 
