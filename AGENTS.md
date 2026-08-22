@@ -31,7 +31,7 @@
 
 ## 開發原則
 
-- 一般修改使用短期 branch，開 PR 後先讀完整 diff，等既有 CI / CodeQL 通過再 squash merge 回 `master`；不要直接推進受保護的主線。
+- 一般變更直接推 `origin/master`，不開功能分支、不開維護 PR（主人 2026-08-22 指示）。只有在需要他人審查、或改動風險高到值得先讓 CI 在 PR 上跑一輪時，才退回 **branch → PR → CI → merge**。 與 `CLAUDE.md` 一致。合併任何 PR（含 Dependabot）前仍必須讀完整 diff。
 - 修 bug 先補可重現失敗測試，再做最小修正。
 - 上游公開目錄格式、`CONTRIBUTING.md` 與 `scripts/validate/` 視為相容性契約。
 - 不為了套格式而大改上游程式；Ruff 只閘本 fork 的 `tests/` 與 `tools/`（E9 + F）。上游 `scripts/` 的 F541／F401 留給上游。
@@ -74,3 +74,15 @@ pwsh -NoProfile -File tools\dev_check.ps1
 - `docs/DECISIONS.md`：長期取捨。
 - `CONTRIBUTING.md`：上游貢獻規則；新增 API 請往上游送。
 - `SECURITY.md`：本 fork 的安全回報流程。
+
+## 對外邊界：PR 只打本 fork
+
+- **PR、push、release 一律指向 `SanHsien/public-apis`。** 對上游 `public-apis/public-apis` 開 PR、push 或發 release
+  需要主人在當次對話明確同意回貢；「fork 一份」「建開發環境」「比照其他 repo」都不是同意。
+- 根因是機制不是粗心：`gh` 在 fork clone 的**預設 repo 就是上游**（`gh repo set-default --view` 會回
+  `public-apis/public-apis`），裸跑 `gh pr create` 必然打上去。每個 clone 先跑一次
+  `gh repo set-default SanHsien/public-apis`。
+- 開 PR 仍明寫 `gh pr create --repo SanHsien/public-apis --base <分支> --head <分支>`，並**讀輸出的 URL**，
+  owner 必須是 `SanHsien`。不是就立刻 `gh pr close` 留言道歉說明，再對 origin 重開。
+- 2026-08-22 一天內兩個工作階段各誤開一個上游 PR（`lidge-jun/opencodex#2373`、
+  `hamanpaul/paulsha-cortex#787`）。批次跑多個 repo 時最容易略過確認，而那正是兩次出事的場合。
