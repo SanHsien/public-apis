@@ -44,9 +44,12 @@ pwsh -NoProfile -File tools\dev_check.ps1
 → check_links：13 份文件（含 scripts/README.md），0 斷連結
 ```
 
-### GitHub Actions
+### GitHub Actions（[`#1`](https://github.com/SanHsien/public-apis/pull/1)）
 
-修補分支 push 後補 run URL。預期：Ubuntu 3.12／3.14 與 Windows 3.14 全綠；上游三個 catalog workflow skipped。
+| Workflow | 結果 | 說明 |
+|---|---|---|
+| [CI](https://github.com/SanHsien/public-apis/actions/runs/32557650546) | success | Ubuntu 3.12／3.14、Windows 3.14 `dev_check.ps1` |
+| 上游 catalog workflows | skipped | repo guard 仍有效 |
 
 ## 已檢查、不列為 finding
 
