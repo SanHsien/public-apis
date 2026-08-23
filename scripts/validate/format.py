@@ -32,11 +32,49 @@ max_description_length = 100
 anchor_re = re.compile(re.escape(anchor) + r'\s(.+)')
 category_title_in_index_re = re.compile(r'\*\s\[(.*)\]')
 link_re = re.compile(r'\[(.+)\]\((http.*)\)')
+table_separator_re = re.compile(r'^\|[\s:|-]+$')
+
+# The API listing lives between these two headings. Everything outside it --
+# the sponsor banner table, the promo headings, the license footer -- is not an
+# API entry and must not be validated against the five-column entry schema.
+list_start_heading = '## Index'
+list_end_heading = '## License'
 
 # Type aliases
 APIList = List[str]
 Categories = Dict[str, APIList]
 CategoriesLineNumber = Dict[str, int]
+
+
+def get_api_list_bounds(lines: List[str]) -> Tuple[int, int]:
+    """Return the [start, end) line range holding the API listing."""
+
+    start = 0
+    end = len(lines)
+
+    for line_num, line_content in enumerate(lines):
+        if line_content.startswith(list_start_heading):
+            start = line_num
+        elif line_content.startswith(list_end_heading):
+            end = line_num
+            break
+
+    return (start, end)
+
+
+def is_table_row(line_content: str) -> bool:
+    """True for entry rows only: not headers, and not `|:---|` separators.
+
+    The old guard tested for `|---`, but every table in README.md writes its
+    separator as `|:---|`. All 45 separator rows were therefore validated as API
+    entries, each producing five bogus column errors -- 557 failures on a README
+    nobody had touched, which is a check that cannot be used to gate anything.
+    """
+
+    if not line_content.startswith('|'):
+        return False
+
+    return not table_separator_re.match(line_content)
 
 
 def error_message(line_number: int, message: str) -> str:
@@ -49,7 +87,12 @@ def get_categories_content(contents: List[str]) -> Tuple[Categories, CategoriesL
     categories = {}
     category_line_num = {}
 
+    start, end = get_api_list_bounds(contents)
+
     for line_num, line_content in enumerate(contents):
+
+        if not start <= line_num < end:
+            continue
 
         if line_content.startswith(anchor):
             category = line_content.split(anchor)[1].strip()
@@ -57,7 +100,7 @@ def get_categories_content(contents: List[str]) -> Tuple[Categories, CategoriesL
             category_line_num[category] = line_num
             continue
 
-        if not line_content.startswith('|') or line_content.startswith('|---'):
+        if not is_table_row(line_content):
             continue
 
         raw_title = [
@@ -206,7 +249,12 @@ def check_file_format(lines: List[str]) -> List[str]:
     category = ''
     category_line = 0
 
+    start, end = get_api_list_bounds(lines)
+
     for line_num, line_content in enumerate(lines):
+
+        if not start <= line_num < end:
+            continue
 
         category_title_match = category_title_in_index_re.match(line_content)
         if category_title_match:
@@ -233,7 +281,7 @@ def check_file_format(lines: List[str]) -> List[str]:
             continue
 
         # skips lines that we do not care about
-        if not line_content.startswith('|') or line_content.startswith('|---'):
+        if not is_table_row(line_content):
             continue
 
         num_in_category += 1

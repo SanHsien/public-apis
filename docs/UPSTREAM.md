@@ -77,3 +77,60 @@ API 目錄條目。那份目錄的內容屬上游，合併後會隨 commit 進�
 | --- | --- | --- |
 | `dependabot/pip/scripts/certifi-2022.12.7`（ahead 1、behind 631） | 2022 年的安全更新分支 | 不引用。它動的是上游 `scripts/requirements.txt` 的 2021 年 pin——本 fork 明文不維護那份（見 `.github/dependabot.yml` 的註解），本 fork 自己的 `requirements-dev.txt` 用的是現行版。 |
 | `copilot/search-businesses-using-apis`（ahead 1、behind 621） | 比對結果沒有變更檔案 | 不引用，沒有內容。 |
+
+## 2026-08-23：`--state all` 補查，並修好一支「對未改動的 README 報 557 個錯」的檢查器
+
+### 查法先修
+
+上一輪查 PR／issue 用 `--state open`。那看不到未合併就關閉的項目——而那正是「上游拒收、但可能
+對本 fork 有價值」的一類。本輪起一律 `--state all`。重查水位（`#6986`）之後：**36 個 PR、
+0 個 issue**。
+
+36 筆裡 33 筆是 `Add <某某> API` 的目錄投稿（社群往上游加條目）。本 fork 的定位是「保留社群目錄，
+以上游為準」，這些條目會隨上游合併後的 commit 進來，不需要逐筆處理。剩下三筆逐條看過：
+
+| PR | 結果 |
+| --- | --- |
+| [#7002](https://github.com/public-apis/public-apis/pull/7002) `fix: 修審查可修項 R-06～R-10`（已關閉） | **不是上游的變更**：author 是 `SanHsien`，改的全是本 fork 自己的維護檔（`FORK.md`、`tools/dev_check.ps1`、`.github/workflows/upstream-check.yml`⋯）——本 fork 端誤開到上游後關閉的那一個。判準見 `AGENTS.md`。 |
+| [#7011](https://github.com/public-apis/public-apis/pull/7011) `Fix README format violations and remove two duplicate entries` | **不引用（內容屬上游）**：它改的是 README 的 47 處條目內容。本 fork 的 README 逐週跟上游同步，在本地改條目等於每次同步都製造衝突，而且那些違規是上游目錄的內容問題。**觸發條件**：上游合併後隨 commit 進來。 |
+| [#7010](https://github.com/public-apis/public-apis/pull/7010) `Fix false positives in format and link validators` | **引用**，見下。 |
+
+### 已引用：PR #7010
+
+**實查證據（本機實跑，不是照抄 PR 說法）**：
+
+```
+python scripts/validate/format.py README.md   →  557 行錯誤, exit 1
+```
+
+對一份**沒有任何人改過**的 README。兩個原因：
+
+1. 略過分隔列的判斷寫的是 `line.startswith('|---')`，但 README 裡每一張表的分隔列都是
+   `|:---|`。45 條分隔列因此全部被當成 API 條目驗，每條產出五個欄位錯誤。
+2. 掃描範圍是整份檔案，所以贊助商三欄表與 `## Index` 之上的宣傳段落也被拿去對五欄條目規則驗。
+
+一支對未改動檔案報 557 個錯的檢查器不能用來 gate 任何東西——唯一的用法是忽略它。而
+`.github/workflows/test_of_push_and_pull.yml` 正是在 PR 上跑它。
+
+**修法**（照上游）：`is_table_row()` 用 `^\|[\s:|-]+$` 認分隔列，`get_api_list_bounds()` 把掃描
+限制在 `## Index`～`## License` 之間。另一半是 `links.py` 手動釘 `host` header——`requests` 每一跳
+都會自己推導 Host，把原始 host 釘到跨網域轉址的目標上，對方會回 421 或一路轉到
+`TooManyRedirects`，於是**正常的連結被報成壞掉**。
+
+**結果**：557 → **47**，而這 47 條是**真的**（描述超長、大小寫、`|` 分段空白、非字母序），正是
+上游 #7011 要修的那批內容。檢查器現在回報的是真的問題。
+
+**驗證**：上游自己的 `scripts/tests` 31 passed / 88 subtests；本 fork 的 `tests/` 22 passed，
+其中 `tests/test_validator_false_positives.py` 5 條把兩類誤報釘住（含對真實 README 斷言不再有
+`:---` 類錯誤）。
+
+### 分支
+
+上游 2 條帶獨佔 commit 的分支：`copilot/search-businesses-using-apis`（behind 621，2025-11）與
+`dependabot/pip/scripts/certifi-2022.12.7`（behind 631，2022-12）。兩條都是多年前的殘留線，
+內容早已被 `master` 取代或無關（後者是 2022 年的 certifi 升版）。**不引用**。
+
+### 水位
+
+- commit：`c045a2e`（`c045a2e..upstream/master` 為 0）
+- PR：**#7023**、issue：**#6986**（`--state all` 查過，沒有更大編號的 issue）

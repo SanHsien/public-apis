@@ -1,5 +1,22 @@
 # 維護決策
 
+## 2026-08-23：修好檢查器，不修上游的目錄內容
+
+**決定**：引用上游 PR #7010，修掉 `scripts/validate/format.py` 與 `links.py` 的兩類誤報；
+**不**引用 PR #7011（修 README 的 47 處條目違規）。PR/issue 一律改用 `--state all` 查。
+
+**理由**：實跑 `python scripts/validate/format.py README.md` 對一份沒人改過的 README 得到
+**557 行錯誤、exit 1**。原因是略過分隔列的判斷寫成 `startswith('|---')`，而 README 每張表的
+分隔列都是 `|:---|`，45 條分隔列全被當成 API 條目驗；另外掃描沒有邊界，贊助商表與宣傳段落也
+被拿去對五欄規則驗。一支對未改動檔案報 557 個錯的檢查器不能 gate 任何東西，而
+`test_of_push_and_pull.yml` 正是在 PR 上跑它。修好之後是 557 → 47，而那 47 條是真的。
+
+那 47 條屬**上游目錄的內容**，本 fork 的 README 逐週跟上游同步；在本地改條目等於每次同步都
+製造衝突。所以修檢查器、不修內容。
+
+**查法**：`--state open` 看不到未合併就關閉的 PR，而那正是「上游拒收但可能對本 fork 有價值」
+的一類。一律 `--state all`。逐項證據見 [`UPSTREAM.md`](UPSTREAM.md)。
+
 ## 2026-08-22：建立 Windows-first 維護型 fork
 
 **決定**：fork `public-apis/public-apis`，保留 MIT 授權與完整歷史，預設分支維持 `master` 以降低與上游同步摩擦。本線聚焦 Windows 開發 gate、fork CI，以及逐筆審查的上游追蹤。目錄本體不翻譯。
