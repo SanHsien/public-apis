@@ -1,0 +1,35 @@
+version: 2
+updates:
+  # 只顧本 fork 的開發閘門（requirements-dev.txt）。上游的
+  # scripts/requirements.txt 是 2021 年的 pin，給上游自己的 Ubuntu 3.8 CI 用；
+  # 本 fork 不幫上游升級那些 pin，所以不納入。
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Asia/Taipei"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "python"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Asia/Taipei"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    groups:
+      # init and analyze must run the exact same version -- a split bump fails
+      # with "Loaded a configuration file for version X, but running version Y",
+      # leaving both pull requests red. Group them so they move together.
+      codeql-action:
+        patterns:
+          - "github/codeql-action*"
