@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 BASELINE_PATH = REPO_ROOT / "tools" / "upstream_baseline.json"
 UPSTREAM_REF_PREFIX = "refs/upstream-check"
+DEFAULT_DECISION_LOG = "docs/DECISIONS.md"
 
 
 class UpstreamCheckError(RuntimeError):
@@ -103,6 +105,127 @@ def collect_new_commits(baseline: dict, repo_dir: Path, ref: str) -> list[dict]:
     return commits
 
 
+
+def upstream_slug(repo_url: str) -> str | None:
+    """`https://github.com/owner/name.git` -> `owner/name`, or None if not GitHub."""
+    match = re.search(
+        r"github\.com[:/](?P<owner>[^/]+)/(?P<name>[^/]+?)(?:\.git)?$", repo_url
+    )
+    return f"{match['owner']}/{match['name']}" if match else None
+
+
+def collect_new_tickets(baseline: dict, kind: str) -> list[dict] | None:
+    """All PRs or issues numbered above the watermark, closed ones included.
+
+    Returns ``None`` -- not an empty list -- when ``gh`` cannot answer, and the
+    report says so. "Not checked" and "nothing to review" look identical in a
+    green report, and only one of them is true; conflating them is how a fork
+    stops noticing upstream without anybody deciding to.
+    """
+    slug = upstream_slug(str(baseline["repo"]))
+    if not slug:
+        return None
+    watermark = int(baseline.get(f"reviewed_{kind}_through", 0) or 0)
+    try:
+        result = subprocess.run(
+            [
+                "gh", kind, "list", "--repo", slug, "--state", "all",
+                "--limit", "1000", "--json", "number,title",
+            ],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            # `errors` is not optional here. Ticket titles are written by
+            # strangers and the console this runs on is not always UTF-8;
+            # without it a single undecodable byte raises UnicodeDecodeError and
+            # the whole upstream check dies instead of reporting what it read.
+            errors="replace",
+        )
+    except OSError:
+        return None
+    if result.returncode != 0:
+        return None
+    try:
+        items = json.loads(result.stdout)
+    except ValueError:
+        return None
+    return sorted(
+        (item for item in items if item["number"] > watermark),
+        key=lambda item: item["number"],
+    )
+
+
+def render_ticket_section(
+    title: str,
+    watermark: int,
+    tickets: list[dict] | None,
+    kind: str,
+    decision_log: str,
+) -> list[str]:
+    lines = [f"## {title}", "", f"Triaged through `#{watermark}`.", ""]
+    if tickets is None:
+        lines.extend(
+            [
+                "Not checked: `gh` was unavailable, unauthenticated, or the baseline",
+                "does not name a GitHub repository. Reported as such rather than as",
+                '"nothing to review" -- the difference matters.',
+                "",
+            ]
+        )
+        return lines
+    if not tickets:
+        lines.extend(["No new items above that number.", ""])
+        return lines
+    lines.extend(
+        [
+            f"{len(tickets)} new item(s) to triage.",
+            "",
+            "| Item | Title |",
+            "| --- | --- |",
+        ]
+    )
+    for ticket in tickets:
+        # The escape is computed outside the f-string: a backslash inside an
+        # f-string expression is a SyntaxError before Python 3.12.
+        item_title = ticket["title"].replace("|", "\\|")
+        lines.append(f"| #{ticket['number']} | {item_title} |")
+    lines.extend(
+        [
+            "",
+            f"Record the verdict in `{decision_log}`, then raise",
+            f"`reviewed_{kind}_through` so the same item is never re-triaged.",
+            "",
+        ]
+    )
+    return lines
+
+
+def append_ticket_sections(
+    report: str, baseline: dict, prs: list[dict] | None, issues: list[dict] | None
+) -> str:
+    """Add the pull-request and issue sections to an existing commit report.
+
+    Appending rather than restructuring keeps each fork's own commit-section
+    wording (and its own hardening) intact.
+    """
+    decision_log = baseline.get("decision_log", DEFAULT_DECISION_LOG)
+    lines = [report.rstrip("\n"), ""]
+    lines += render_ticket_section(
+        "Upstream pull requests",
+        int(baseline.get("reviewed_pr_through", 0) or 0),
+        prs,
+        "pr",
+        decision_log,
+    )
+    lines += render_ticket_section(
+        "Upstream issues",
+        int(baseline.get("reviewed_issue_through", 0) or 0),
+        issues,
+        "issue",
+        decision_log,
+    )
+    return "\n".join(lines)
+
 def render_markdown(
     baseline: dict,
     commits: list[dict],
@@ -165,11 +288,15 @@ def main() -> int:
 
     baseline: dict
     commits: list[dict] = []
+    prs: list[dict] | None = None
+    issues: list[dict] | None = None
     error: str | None = None
     try:
         baseline = load_baseline()
         ref = fetch_upstream(baseline, args.repo_dir)
         commits = collect_new_commits(baseline, args.repo_dir, ref)
+        prs = collect_new_tickets(baseline, "pr")
+        issues = collect_new_tickets(baseline, "issue")
     except UpstreamCheckError as exc:
         error = str(exc)
         baseline = {
@@ -180,13 +307,29 @@ def main() -> int:
         }
 
     report = render_markdown(baseline, commits, error)
+    if not error:
+        report = append_ticket_sections(report, baseline, prs, issues)
     output = Path(args.output)
     output.write_text(report, encoding="utf-8")
     print(report)
 
     if error:
         return 2
-    if args.strict and commits:
+    unavailable = [
+        name
+        for name, value in (("pull requests", prs), ("issues", issues))
+        if value is None
+    ]
+    if unavailable:
+        # Fail closed. A report that could not enumerate tickets must not
+        # be allowed to read as a clean bill of health.
+        print(
+            "ERROR: gh could not enumerate upstream "
+            + " and ".join(unavailable)
+            + "."
+        )
+        return 2
+    if args.strict and (commits or prs or issues):
         return 1
     return 0
 
