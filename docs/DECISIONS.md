@@ -79,3 +79,49 @@ commit 水位。那兩個面向不是「查過沒發現」，是根本沒查，�
 綠燈不是「沒有待辦」，是沒有人看。
 
 **觸發條件**：報告列出項目時逐筆讀 diff、把採用／略過理由寫進本檔，然後才推進 baseline 的水位。
+
+
+## 2026-08-30：README 同步到上游 tip，96 個 PR 與 6 個 issue 的判定
+
+commit 水位 `c045a2eb` → `988c57be`（`upstream/master` tip）；PR 水位 7023 → 7135；
+issue 水位 6986 → 7113。
+
+### 24 個 commit：全部只改 `README.md`，直接同步
+
+逐一列過：24 筆**沒有一筆碰到 `README.md` 以外的檔案**，全是上游收進來的新 API 條目
+（KinoPipe／BTCGlobe／TickerLayer／CurrencyBeacon／EOD Historical Data／SMTPfast…）
+加兩筆 `Fix alphabetical order`／`Fix docs link`。
+
+同步方式是**整檔取上游的版本**，因為 `FORK.md` 寫著「`README.md` **不翻譯、不改寫**，
+保持上游英文為單一真相源」。實測本 fork 的 `README.md` 與上游 tip 只差 **11 行刪除、0 行新增**
+——就是那 11 個新條目，本 fork 沒有任何 overlay 在裡面。取上游版本不會蓋掉本線的東西。
+
+**同步引入一個上游自己的格式缺陷**（照實記）：`scripts/validate/format.py` 的 findings
+從 47 增為 48，多出來的那條是 `(L1649) Science & Math category is not alphabetical order`
+——上游把 **`NASA InSight` 放在 `NASA ADS` 之前**。上游自己的 `test_of_push_and_pull.yml`
+會跑 `format.py`，但那支只驗**單一 PR 動到的檔**，兩個各自合乎字母序的 PR 依序合併之後就會
+出現這種跨 PR 的亂序。
+
+本 fork **不自行修正**：`FORK.md` 明訂目錄本體以上游為準，本線改了會在下次同步變成衝突。
+本 fork 的 gate 也不跑 `format.py`（上游那支帶 `github.repository == 'public-apis/public-apis'`
+guard），所以不會讓本線變紅。**觸發條件**：這正是 `FORK.md`「修的是上游驗證腳本或目錄格式的
+bug 就送回去」涵蓋的情況——要回貢需要維護者在當次對話明確同意，目前沒有。
+
+### 96 個 PR：93 筆是目錄投稿，3 筆是上游的測試噪音
+
+| 分類 | 筆數 | 判定 |
+| --- | --- | --- |
+| **只改 `README.md`**（新增 API 條目） | **93** | 這個 repo 的產品就是**被策展過的目錄**。已合併的隨 commit 軸抵達（本輪已同步）；仍 OPEN 的是**還沒被上游接受的投稿**，本 fork 去收等於自行策展，而 `FORK.md` 說目錄以上游為準；**關閉未合併的是上游拒收的條目**，收進來等於把上游判定不合格的 API 放回目錄——那是主動做錯 |
+| `test block check`（`#7087`／`#7088`／`#7116`） | 3 | 上游自己的測試用拋棄式 PR，各加一個 `TEST_BLOCK_CHECK.txt`／`block_check_test.md` 之類的檔，全部 CLOSED。沒有內容 |
+
+**這個 repo 的通則**（值得記下來，下次不必重推）：上游是策展型目錄時，PR 軸上跑的是**投稿佇列**
+而不是變更提案。fork 透過 commit 軸取得策展結果，不去替上游決定哪個 API 該進榜。
+
+### 6 個 issue：1 筆有內容，5 筆是求助／噪音
+
+- **`#7089`（OPEN）「89 entries have hard 404 links」**：真實的資料品質問題，而本 fork 逐字
+  鏡像同一份目錄，所以那 89 條死連結本線也有。但修它就是策展，依 `FORK.md` 屬上游職責。
+  **觸發條件**：上游移除那些條目時會經由 commit 軸抵達，屆時本 fork 的 `README.md` 同步即可跟上。
+- `#7059`（CLOSED，標題只有人名）、`#7064`（要 Claude Desktop API key）、`#7102`／`#7109`／
+  `#7113`（標題各為 `Public app`／`edge`／`USA appointments`，無內容）：使用者求助或空 issue，
+  無可引用內容。

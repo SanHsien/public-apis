@@ -1,9 +1,9 @@
 {
   "repo": "https://github.com/public-apis/public-apis.git",
   "branch": "master",
-  "reviewed_through": "c045a2eb505f0f8b7992bb4af53cc020f25003fd",
-  "reviewed_date": "2026-08-23",
-  "notes": "SanHsien fork baseline at clone time. HEAD is upstream master commit Merge pull request #6962 from ddevetak/add-football-charts. 2026-08-23：改用 --state all 查（先前只查 open）；36 個新 PR 中 33 筆為目錄投稿隨上游 commit 進來，#7002 是本 fork 端誤開後關閉，#7011 屬上游 README 內容不引用，#7010 引用——它修好一支對未改動 README 報 557 個錯的檢查器（實跑確認 557 → 47 個真錯）。",
-  "reviewed_pr_through": 7023,
-  "reviewed_issue_through": 6986
+  "reviewed_through": "988c57be4616cc9507fd3e8c34adedba5387f079",
+  "reviewed_date": "2026-08-30",
+  "notes": "SanHsien fork baseline at clone time. HEAD is upstream master commit Merge pull request #6962 from ddevetak/add-football-charts. 2026-08-23：改用 --state all 查（先前只查 open）；36 個新 PR 中 33 筆為目錄投稿隨上游 commit 進來，#7002 是本 fork 端誤開後關閉，#7011 屬上游 README 內容不引用，#7010 引用——它修好一支對未改動 README 報 557 個錯的檢查器（實跑確認 557 → 47 個真錯）。 2026-08-30：commit 水位 c045a2eb → 988c57be、PR 7023 → 7135、issue 6986 → 7113。24 個 commit 全部只改 README.md，依 FORK.md「README 不改寫、以上游為單一真相源」整檔同步（本 fork 與上游只差 11 行、無 overlay）。同步引入上游自己的一個格式缺陷（NASA InSight 排在 NASA ADS 之前），本 fork 不自行修正，理由與觸發條件見 DECISIONS 同日條目。96 個 PR 裡 93 筆是目錄投稿（OPEN 的還沒被上游接受、CLOSED 的是上游拒收，兩者都不該由 fork 自行收）、3 筆是上游的 test block check 噪音。6 個 issue 只有 #7089（89 條死連結）有內容，但修它屬策展、依 FORK.md 是上游職責。",
+  "reviewed_pr_through": 7135,
+  "reviewed_issue_through": 7113
 }

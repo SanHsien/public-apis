@@ -134,3 +134,21 @@ python scripts/validate/format.py README.md   →  557 行錯誤, exit 1
 
 - commit：`c045a2e`（`c045a2e..upstream/master` 為 0）
 - PR：**#7023**、issue：**#6986**（`--state all` 查過，沒有更大編號的 issue）
+
+
+## 2026-08-30：README 同步，三個面向同時推進
+
+- commit：`988c57be4616cc9507fd3e8c34adedba5387f079`（`upstream/master` tip；`c045a2e` 之後 24 筆，
+  **全部只改 `README.md`**）
+- PR：**#7135**、issue：**#7113**（皆 `--state all` 查過）
+
+24 個 commit 沒有一筆碰到 `README.md` 以外的檔案，所以依 `FORK.md`「README 不改寫、以上游為
+單一真相源」整檔取上游版本——同步前本 fork 與上游只差 11 行刪除、0 行新增，沒有 overlay 會被蓋掉。
+
+96 個 PR 裡 93 筆是目錄投稿（OPEN 的還沒被上游接受、CLOSED 的是上游拒收，兩者都不該由 fork 自行
+收），3 筆是上游的 `test block check` 噪音。6 個 issue 只有 `#7089`（89 條死連結）有內容，
+但修它屬策展、依 `FORK.md` 是上游職責。
+
+**同步引入一個上游自己的格式缺陷**：`format.py` findings 47 → 48，多的是
+`Science & Math` 區段 `NASA InSight` 排在 `NASA ADS` 之前。本 fork 不自行修正（改了下次同步會
+衝突，且本 fork 的 gate 不跑 `format.py`）。逐項理由見 [`DECISIONS.md`](DECISIONS.md) 同日條目。
