@@ -1,5 +1,18 @@
 # 維護決策
 
+## 2026-08-31：同步 README 的 10 個上游 API 條目
+
+**決定**：採用 `988c57be..9dfcbca` 的 20 個提交；它們全部只新增 `README.md` 的 10 行目錄內容，
+不改 fork 的驗證器、workflow 或維護文件。
+
+**理由**：`FORK.md` 的契約是 README 以上游為單一真相源，且本檔沒有 overlay。逐檔 diff 為
+`10 insertions, 0 deletions`，故逐行同步並把 commit 水位推到 `9dfcbca`；PR/issue 水位不因本輪
+未重新查詢而變動。
+
+同輪查到 PR `#7136..#7172` 共 36 筆，逐筆 `files` 都只有 `README.md`。其中 #7149／#7150 已合併，
+已在本輪 commit 同步；其餘是上游尚未接受的條目、排字或已關閉投稿，依相同政策不在 fork 搶先收。
+故僅把 PR 審查水位推到 #7172，issue 水位維持 #7113。
+
 ## 2026-08-23：修好檢查器，不修上游的目錄內容
 
 **決定**：引用上游 PR #7010，修掉 `scripts/validate/format.py` 與 `links.py` 的兩類誤報；

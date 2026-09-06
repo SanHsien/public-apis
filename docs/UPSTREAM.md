@@ -31,6 +31,14 @@ Baseline 代表「已審查」，不代表「全部已合併」。
 
 `README.md` 新條目直接同步，不必翻譯。若上游改了 `scripts/validate/` 或 GitHub Actions，才需要核對本 fork 的 Windows gate 是否仍能跑。
 
+## 2026-08-31：審至 `9dfcbca`
+
+- commit：`988c57be..9dfcbca` 共 20 筆，全部只改 `README.md`，新增 10 個 API 條目；依 README 單一真相源政策逐行同步。
+- PR：`#7136..#7172` 共 36 筆，逐筆 `files` 都只有 `README.md`；#7149／#7150 已隨上述提交同步，其餘不搶先收錄。
+- issue：沒有高於既有 #7113 的項目。
+
+水位已寫入 `tools/upstream_baseline.json`：commit `9dfcbcaab75aecf1f7081e98dd968800fb5bd912`、PR #7172、issue #7113。
+
 ## 2026-08-22：fork 起點
 
 本 fork 自上游 `master` `c045a2eb505f0f8b7992bb4af53cc020f25003fd`
