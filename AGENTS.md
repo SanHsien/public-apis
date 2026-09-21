@@ -35,7 +35,7 @@
 - 修 bug 先補可重現失敗測試，再做最小修正。
 - 上游公開目錄格式、`CONTRIBUTING.md` 與 `scripts/validate/` 視為相容性契約。
 - 不為了套格式而大改上游程式；Ruff 只閘本 fork 的 `tests/` 與 `tools/`（E9 + F）。上游 `scripts/` 的 F541／F401 留給上游。
-- 使用繁體中文回覆；維護文件用繁中。目錄本體維持英文。
+- 使用繁體中文回覆；維護文件用繁中。目錄本體維持英文。回覆直接交付可驗證結果，避免冗長背景鋪陳。
 - 提交訊息建議 Conventional Commit。
 - **合併任何 PR 前先讀 diff**：CI 綠燈證明的是「測試沒紅」，不是「改了什麼、該不該進 `master`」。lockfile 的連鎖升級、transitive major、跨出宣告範圍的變更，只有讀 diff 看得到。核准或合併訊息要寫出讀到什麼、為什麼可接受。
 - `REVIEW.md` 是風險快照，不是每個一般 bug 的流水帳。

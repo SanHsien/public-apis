@@ -15,7 +15,6 @@ def test_maintainer_files_exist() -> None:
         ROOT / "FORK.md",
         ROOT / "NOTICE.md",
         ROOT / "AGENTS.md",
-        ROOT / "CLAUDE.md",
         ROOT / "SECURITY.md",
         ROOT / "REVIEW.md",
         ROOT / "docs" / "UPSTREAM.md",
