@@ -39,6 +39,14 @@ Baseline 代表「已審查」，不代表「全部已合併」。
 
 水位已寫入 `tools/upstream_baseline.json`：commit `9dfcbcaab75aecf1f7081e98dd968800fb5bd912`、PR #7172、issue #7113。
 
+## 2026-09-30：審至 `8939d468`
+
+- commit：`9dfcbca..8939d468` 共 544 筆，只動 `README.md`（278 次）與 `CONTRIBUTING.md`（1 次，MCP Servers 條目格式）；兩邊歷史無共同祖先，依單一真相源政策整檔同步兩個檔案。
+- PR：`#7173..#7621` 共 413 筆（216 merged／173 open／24 closed），依判準五視為投稿佇列，已合併者隨 commit 抵達，其餘不收；驗證腳本 PR 不適用。
+- issue：`#7114..#7622`，死連結回報屬策展、為上游職責。逐項判定見 [`DECISIONS.md`](DECISIONS.md) 同日條目。
+
+水位已寫入 `tools/upstream_baseline.json`：commit `8939d468fa4580039c4e22cc4998eb3fef8130d1`、PR #7621、issue #7622。
+
 ## 2026-08-22：fork 起點
 
 本 fork 自上游 `master` `c045a2eb505f0f8b7992bb4af53cc020f25003fd`

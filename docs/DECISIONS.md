@@ -138,3 +138,21 @@ bug 就送回去」涵蓋的情況——要回貢需要維護者在當次對話�
 - `#7059`（CLOSED，標題只有人名）、`#7064`（要 Claude Desktop API key）、`#7102`／`#7109`／
   `#7113`（標題各為 `Public app`／`edge`／`USA appointments`，無內容）：使用者求助或空 issue，
   無可引用內容。
+
+## 2026-09-30：上游 544 個 commit、PR #7173–#7621、issue 至 #7622 審查
+
+**決策**：`master` 上自 `9dfcbca` 起的 544 個 commit 只動 `README.md`（278 次）與 `CONTRIBUTING.md`（1 次，新增 MCP Servers 條目格式段落）；`scripts/`、`.github/` 無變動。兩邊歷史無共同祖先（無 merge base），依 `FORK.md` 單一真相源政策整檔同步：`git checkout upstream/master -- README.md CONTRIBUTING.md`（fork 的 README 與舊基準僅差 4 行排序，無 overlay）。基準線推進至 `8939d468`。
+
+**PR（413 筆：216 merged／173 open／24 closed）**：依 PLAYBOOK 判準五，PR 軸是投稿佇列。
+
+| 分類 | 判定 |
+| --- | --- |
+| 216 筆已合併 | 經 commit 軸抵達（本輪已同步） |
+| open／closed 的「Add … API」投稿（絕大多數） | 不收：未被上游接受或被拒的條目，替上游決定收錄不是 fork 的工作 |
+| open 的目錄勘誤（死連結、空白、欄位、移除下架 API，如 #7180–#7183、#7204、#7217、#7221、#7248、#7515） | 不收：屬策展，上游職責；上游合併後隨 commit 軸抵達 |
+| open 的驗證腳本 PR（#7184、#7249、#7359、#7513） | 不適用：`scripts/validate/` 以上游為準，本 fork 的 `format.py` 另有維護修改；上游合併後再評估 |
+| closed 的 #7179 `test2b`、#7511、#7265 等 | 不適用：測試噪音或已被上游拒收 |
+
+**Issue（#7114–#7622）**：唯一有內容的是 #7301／#7435／#7583（死連結與棄用 API 回報），修正屬策展，依 `FORK.md` 為上游職責；#7440 是 MCP server 徵集，#7577／#7260／#7601 為無關內容。觸發條件：上游移除條目時隨 commit 軸抵達。
+
+**驗證**：`dev_check.ps1` 全綠後才推進；`format.py` 在同步後的 findings 不計入本線 gate（見 2026-08-30 條目）。
