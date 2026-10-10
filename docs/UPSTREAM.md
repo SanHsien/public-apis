@@ -4,7 +4,8 @@
 
 - Fork：`origin` → `https://github.com/SanHsien/public-apis.git`
 - 原作者：`upstream` → `https://github.com/public-apis/public-apis.git`
-- 追蹤分支：`master`
+- Fork 維護主線：`origin/main`
+- 上游唯讀追蹤分支：`upstream/master`；fetch／PR／issue 查詢不代表回貢授權，禁止對上游 push／建立 PR／release。
 
 ## 檢查新提交
 
@@ -23,13 +24,32 @@ python tools\check_upstream_updates.py --strict
 1. 讀 commit 主旨與變更檔案。
 2. 判斷是否與 Windows gate、fork 文件或測試衝突。
 3. 可直接同步的提交用 merge；只需要部分修正時 cherry-pick 或最小重做。
-4. 跑 `pwsh -NoProfile -File tools\dev_check.ps1`。
-5. 在 `docs/DECISIONS.md` 記錄採用／略過理由。
-6. 驗證完成後才把 baseline 推進到已審查的完整 40 字元 SHA。
+4. 在 `docs/DECISIONS.md` 記錄採用／延期／拒絕理由，並在本檔同步三軸審查水位。
+5. 將候選 baseline 更新到已審查的完整 SHA 與 PR／issue 編號。
+6. 所有產品、文件與 baseline 編輯完成後，跑 focused tests 與 `pwsh -NoProfile -File tools\dev_check.ps1` 完整 gate。
+7. 跑真實 `python tools\check_upstream_updates.py --strict`，確認三軸均無未審項。
+8. gate 與 strict 均成功，且完整工作樹輸入未再修改後，才發布到 `SanHsien/public-apis`。
 
 Baseline 代表「已審查」，不代表「全部已合併」。
 
 `README.md` 新條目直接同步，不必翻譯。若上游改了 `scripts/validate/` 或 GitHub Actions，才需要核對本 fork 的 Windows gate 是否仍能跑。
+
+## 2026-10-10：審至 `874e587`，補正最終 baseline／文件驗證
+
+- commit：`8939d468..874e587` 共 198 筆（192 catalog、5 merge、1 duplicate-links validator fix）。
+  README 精確同步上游 tip；保留本 fork 的新版依賴、CI、Host-header 與 formatter 修正。
+- PR：初輪 #7621 以上 253 筆，adopt 70／defer 170／reject 13，具體判定見 [`DECISIONS.md`](DECISIONS.md)。
+  發布後新增 #7894 Allscreenshots／#7895 Pumperly，精準 metadata／完整 diff 均只有 README 新增 1 行且 OPEN；
+  兩筆 defer 至上游接受，沒有在 fork 搶先收錄。
+  最後 strict 又攔下新增的 #7896 MangaDex docs 連結修正（README 1 行替換、OPEN），亦 defer 至上游接受。
+  PR 審查水位由 #7893 推至 #7896。
+- issue：#7622 以上 4 筆，defer 1／reject 3；水位維持 #7766。
+
+commit 水位為 `874e5879d20843f7c2a5822cef4c0752127b3775`。
+`test_baseline_matches_decisions_record` 會檢查 baseline 與本檔的一致性；
+baseline 改動會影響 gate，不能沿用更新水位前的 gate 成功證據。
+本輪先重現已發布 HEAD `975364bf` 的 focused failure，再完成全部文件／baseline 編輯，
+最後對同一候選完整跑 Windows gate 與 strict；遠端 CI 需發布後另驗。
 
 ## 2026-08-31：審至 `9dfcbca`
 

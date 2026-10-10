@@ -1,5 +1,30 @@
 # 維護決策
 
+## 2026-10-10：修復已發布 CI 文件契約，延期新增目錄 PR
+
+**根因**：`975364bf` 的 CI run `38055443269` 在
+`test_baseline_matches_decisions_record` 失敗：baseline 已改為 `874e587`，
+但 `docs/UPSTREAM.md` 未記錄它。前輪完整 gate 在 baseline 更新前執行，
+不能代表最終發布狀態全綠；本輪先以同一 focused test 實際重現 failure，保留舊 gate 與失敗證據。
+
+**修正**：同步 UPSTREAM 的 commit／PR／issue 清冊與 `origin/main`、唯讀 `upstream/master` 邊界。
+baseline 會影響上述測試；往後全部文件與水位完成後，必須執行完整 canonical gate，
+以完整工作樹 hash 綁定，再跑真實 strict 三軸查核。沒有修改或弱化測試。
+
+| 新上游 PR | 狀態與完整 diff 判定 |
+| --- | --- |
+| [#7894 Allscreenshots](https://github.com/public-apis/public-apis/pull/7894) | OPEN；head `f1d41c632e8fb237c7bdae5c8a79024abd55916b`，僅 README Development 區新增 1 行 screenshot／PDF API。defer：上游尚未接受投稿，待其合併後隨 commit 軸同步 |
+| [#7895 Pumperly](https://github.com/public-apis/public-apis/pull/7895) | OPEN；head `1cfdcebf4183cea7ef03517f070f068d37c8cbf3`，僅 README Transportation 區新增 1 行 fuel／EV charger API。defer：上游尚未接受投稿，待其合併後隨 commit 軸同步 |
+
+| [#7896 MangaDex](https://github.com/public-apis/public-apis/pull/7896) | 第一次最終 strict 查核才出現；OPEN，head `6b599a745010e78c1e405c6daadb3c6ccbe7d7b6`，僅 README 將 MangaDex docs.html URL 改成 docs/（1 行替換）。defer：依目錄單一真相源，待上游合併後同步 |
+
+三筆精準 metadata／diff 的原始輸出保存在本輪工作區 `outputs/publicapis-final-ci-fix-*`。
+沒有探測第三方 API 或改目錄；只將已審 PR 水位 #7893 → #7896，commit `874e587`／issue #7766 不變。
+第一次完整 gate 已通過，但 strict 因剛新增 #7896 回 exit 1，該失敗證據保留；
+補完 #7896 決策／水位後再對最後狀態跑完整 gate 與 strict，不能沿用前一狀態的 gate。
+所有最後編輯完成後的 focused、Windows gate、strict 與完整輸入 hash 為本輪驗收依據；
+遠端 CI 需發布後另驗，不能以本機結果代稱已成功。
+
 ## 2026-10-10：198 個上游提交與 PR／issue 三軸審查
 
 **範圍**：commit `8939d468fa4580039c4e22cc4998eb3fef8130d1` →
@@ -37,8 +62,9 @@ issue #7622 以上 4 筆。查詢使用 `--state all`，保留閉單；commit、
 本輪只審高於既有水位的新項目；低於水位的既有 open proposals 不宣稱本輪重新覆核。
 Defer 表中的明確觸發條件仍有效；水位代表已審查，並非已採用所有提案。
 
-**驗證順序**：先跑受影響離線測試與 Windows canonical gate，再更新三軸水位；最後以真實
-`check_upstream_updates.py --strict` 驗證 commit／PR／issue 三軸均無新待審項。沒有弱化 strict gate。
+**驗證順序補正**：前輪先跑 gate 再改 baseline，未涵蓋最終文件契約；已發布 CI 因 UPSTREAM 缺少 `874e587` 失敗。
+所有最後文件與三軸水位編輯完成後，必須重跑完整 Windows canonical gate，再以真實
+`check_upstream_updates.py --strict` 查核三軸。前輪 gate 不再視為最終狀態全綠，沒有弱化測試或 strict gate。
 
 ## 2026-08-31：同步 README 的 10 個上游 API 條目
 
