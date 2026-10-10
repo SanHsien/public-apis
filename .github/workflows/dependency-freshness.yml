@@ -9,6 +9,15 @@ on:
     branches: [main]
     paths:
       - requirements-dev.txt
+      - scripts/requirements.txt
+      - tools/check_dependency_freshness.py
+      - .github/dependabot.yml
+      - .github/workflows/dependency-freshness.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - requirements-dev.txt
+      - scripts/requirements.txt
       - tools/check_dependency_freshness.py
       - .github/dependabot.yml
       - .github/workflows/dependency-freshness.yml
@@ -34,10 +43,9 @@ jobs:
       PYTHONIOENCODING: "utf-8"
 
     steps:
-      - name: Check out main
+      - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: main
           persist-credentials: false
 
       - name: Set up Python
@@ -57,8 +65,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           CHECKER_NEEDS_ATTENTION: ${{ steps.deps.outputs.needs_attention }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          open_prs="$(gh pr list \
+          open_prs="$(gh pr list --repo SanHsien/public-apis \
             --state open \
             --author app/dependabot \
             --json number,title,url)"
@@ -72,7 +81,11 @@ jobs:
               echo "- None"
             else
               jq -r '.[] | "- [#\(.number) \(.title)](\(.url))"' <<< "$open_prs"
-              needs_attention="true"
+              # PRs gate their candidate manifests; other events also gate
+              # the repository's outstanding dependency maintenance.
+              if [ "$EVENT_NAME" != "pull_request" ]; then
+                needs_attention="true"
+              fi
             fi
           } >> dependency-freshness-report.md
           echo "needs_attention=$needs_attention" >> "$GITHUB_OUTPUT"

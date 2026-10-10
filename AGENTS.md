@@ -7,7 +7,7 @@
 這是 [`public-apis/public-apis`](https://github.com/public-apis/public-apis) 的 MIT fork。
 核心價值是一份人工整理的免費 public API 目錄：每筆標好 Auth、HTTPS、CORS。複製說明文件網址就能用。
 
-`origin` 是 `SanHsien/public-apis`，`upstream` 是原作者 repo，預設分支皆為 `master`。
+`origin` 是 `SanHsien/public-apis`，`upstream` 是原作者 repo，本 fork 預設分支為 `main`，上游為 `master`。
 保留上游作者、MIT 授權與 `README.md` 目錄。本 fork 的維護差異記在 [`FORK.md`](FORK.md) 與 [`docs/DECISIONS.md`](docs/DECISIONS.md)。
 
 主要開發與完整驗收環境是 **Windows 11 + PowerShell**；Ubuntu CI 補跨平台相容性。
@@ -22,7 +22,7 @@
 
 ## 技術與資料流
 
-- Python 3.9+（本機與 Windows CI 以 3.14 為準；Ubuntu CI 跑 3.12 與 3.14）；上游 GitHub Actions 仍跑 3.8，不要去改那些 workflow 的版本，除非回貢。
+- Python 3.10+（本機與 Windows CI 以 3.14 為準；Ubuntu CI 跑 3.12 與 3.14）；上游 GitHub Actions 仍跑 3.8，不要去改那些 workflow 的版本，除非回貢。
 - `README.md`：API 目錄。
 - `scripts/validate/`：格式與連結檢查（以上游為準）。
 - `tools/`：fork 維護工具（上游檢查、相對連結檢查、Windows gate）。
@@ -31,13 +31,13 @@
 
 ## 開發原則
 
-- 一般變更直接推 `origin/master`，不開功能分支、不開維護 PR（2026-08-22 起）。只有在需要他人審查、或改動風險高到值得先讓 CI 在 PR 上跑一輪時，才退回 **branch → PR → CI → merge**。與 `CLAUDE.md`、`FORK.md` 一致。合併任何 PR（含 Dependabot）前仍必須讀完整 diff。
+- 一般變更直接推 `origin/main`，不開功能分支、不開維護 PR（2026-08-22 起）。只有在需要他人審查、或改動風險高到值得先讓 CI 在 PR 上跑一輪時，才退回 **branch → PR → CI → merge**。與 `CLAUDE.md`、`FORK.md` 一致。合併任何 PR（含 Dependabot）前仍必須讀完整 diff。
 - 修 bug 先補可重現失敗測試，再做最小修正。
 - 上游公開目錄格式、`CONTRIBUTING.md` 與 `scripts/validate/` 視為相容性契約。
 - 不為了套格式而大改上游程式；Ruff 只閘本 fork 的 `tests/` 與 `tools/`（E9 + F）。上游 `scripts/` 的 F541／F401 留給上游。
 - 使用繁體中文回覆；維護文件用繁中。目錄本體維持英文。回覆直接交付可驗證結果，避免冗長背景鋪陳。
 - 提交訊息建議 Conventional Commit。
-- **合併任何 PR 前先讀 diff**：CI 綠燈證明的是「測試沒紅」，不是「改了什麼、該不該進 `master`」。lockfile 的連鎖升級、transitive major、跨出宣告範圍的變更，只有讀 diff 看得到。核准或合併訊息要寫出讀到什麼、為什麼可接受。
+- **合併任何 PR 前先讀 diff**：CI 綠燈證明的是「測試沒紅」，不是「改了什麼、該不該進 `main`」。lockfile 的連鎖升級、transitive major、跨出宣告範圍的變更，只有讀 diff 看得到。核准或合併訊息要寫出讀到什麼、為什麼可接受。
 - `REVIEW.md` 是風險快照，不是每個一般 bug 的流水帳。
 
 ## 上游處理

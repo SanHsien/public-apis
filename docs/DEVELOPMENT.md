@@ -16,6 +16,9 @@ README.md（人工整理的 public API 目錄）
 
 ## 本機開發（Windows）
 
+Python >=3.10；維護環境與 Windows CI 使用 3.14，Ubuntu CI 使用 3.12／3.14。
+`requirements-dev.txt` 會引用並安裝本 fork 維護的 `scripts/requirements.txt`。
+
 ```powershell
 python -m venv .venv
 .venv\Scripts\python -m pip install --upgrade pip
@@ -46,7 +49,7 @@ pwsh -NoProfile -File tools\dev_check.ps1
 
 不把 `format.py README.md` 或完整／重複連結掃描當本 fork 硬閘門：上游 `master` 當下自己就過不了。細節見 [`DECISIONS.md`](DECISIONS.md)。
 
-push 到 `master` 後，GitHub Actions 在 Ubuntu 跑 3.12 與 3.14，Windows 跑 3.14。上游原有 workflows 加上 `github.repository == 'public-apis/public-apis'`，避免在本 fork 每天紅燈。
+push 到 `main` 後，GitHub Actions 在 Ubuntu 跑 3.12 與 3.14，Windows 跑 3.14。上游原有 workflows 加上 `github.repository == 'public-apis/public-apis'`，避免在本 fork 每天紅燈。
 
 ## 不要做的事
 

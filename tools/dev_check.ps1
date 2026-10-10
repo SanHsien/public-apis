@@ -36,7 +36,7 @@ Invoke-PythonStep -Label "Compile maintained Python" -Arguments @(
     "-m", "compileall", "-q", "scripts", "tests", "tools"
 )
 Invoke-PythonStep -Label "Ruff (E9 + F)" -Arguments @(
-    "-m", "ruff", "check", "--select", "E9,F", "--target-version", "py39",
+    "-m", "ruff", "check", "--select", "E9,F", "--target-version", "py310",
     "tests", "tools"
 )
 Invoke-PythonStep -Label "Pytest" -Arguments @("-m", "pytest", "tests", "-q")
