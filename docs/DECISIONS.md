@@ -1,5 +1,45 @@
 # 維護決策
 
+## 2026-10-10：198 個上游提交與 PR／issue 三軸審查
+
+**範圍**：commit `8939d468fa4580039c4e22cc4998eb3fef8130d1` →
+`874e5879d20843f7c2a5822cef4c0752127b3775`；PR #7621 以上 253 筆（70 merged、176 open、7 closed）；
+issue #7622 以上 4 筆。查詢使用 `--state all`，保留閉單；commit、PR、issue 分別審查。
+
+**Commit 決定**：198 筆中，192 筆只改 `README.md`、5 筆 merge 沒有額外檔案差異、1 筆改 validator。
+本 fork README 與舊基準逐 byte 相同、沒有 overlay；依單一真相源契約同步上游 tip，
+目錄淨差異為 96 行新增、8 行刪除。未網掃目錄或搶先採用未合併投稿。
+
+採用 `c2886ac0fc288cc21cc2349987842c6dbc392202` 的兩檔完整差異：
+`check_duplicate_links` 對重複項增加 seen count，避免同一 URL 出現三次時回報兩次；
+上游 unittest 對三次出現的預期從 2 改成 1。新增 fork 離線測試涵蓋 trailing slash 正規化、
+兩個重複 URL 的發現順序、無重複案例及不改輸入；修正前 2 fail／1 pass。
+保留本 fork 的 Host-header 修正、formatter 邊界、新版 requests manifest 與 CI。
+
+**PR 決定**：242 筆只動目錄，70 merged 隨 commit 軸採用、167 open defer 至上游接受、
+5 closed 未合併 reject。另 11 筆讀完整 diff 後分流如下（總計 adopt 70／defer 170／reject 13）：
+
+| PR | 決定與具體理由／再評估條件 |
+| --- | --- |
+| #7708 | defer：新增 MCP schema、Transport／Install 與 category 邊界檢查。本 fork 已把 API parsing 限在 Index–License，直接移植不足以涵蓋前言的 MCP 表，且此 PR 限制 Cursor／Anthropic／Glama，不接受目前上游已有的 npm／MCP Registry Install。待上游接受或明確要求 fork MCP validator，再做相容性測試 |
+| #7763 | reject：只把 requests 改為 >=2.32.4；本 fork 已完整測過 requests 2.34.2＋urllib3 2.8.0 與其依賴，不覆蓋協調 manifest |
+| #7765 | defer：移除 script directory 的 sys.path 並設定 Session.trust_env=False，但保留會重新帶回的 Host header。聲稱的 PR 網路驗證 workflow 在 fork 有 owner guard；移除一個 sys.path 也不能防 PR 直接替換 links.py。trust_env=False 改變 proxy／netrc／custom CA 契約，待啟用 fork 網路驗證或明確核准隔離 session 行為，才拆分適用修正及測試 |
+| #7774、#7806、#7835、#7855、#7892 | reject：完整 diff 均僅增加 error_message 的 auto-generated docstring，沒有功能修正 |
+| #7784、#7785 | reject：兩筆 closed 未合併 PR 只加 vista_b1／b2／b3 HTML，與目錄及 validator 無關 |
+| #7827 | defer：混合 README 重新策展、formatter schema／index／最低條目規則改寫、PR link scan scoping、Bash 與 loopback HTTP tests。Host header／分隔列／前言誤報部分已在 fork 修正；README 改寫仍未被上游接受。待上游合併後分檔評估，另驗 Windows shell 與 parser 相容性 |
+
+**Issue 決定**：#7625（body 只有 Mind）、#7696（無關第三方 IP URL 招攬，未造訪）、
+#7702（空內容）reject；#7766 的 GovContract Radar API 投稿 defer 至上游策展接受，
+不由 fork 探測第三方 endpoint 或自行加條目。總計 defer 1／reject 3。
+
+**審查證據**：完整 198 筆 SHA／檔案清冊、253 筆 PR 的 state／files／逐項理由、4 筆 issue body／理由，
+及 11 個非 catalog PR 的完整 patch 保存於本輪工作區 `outputs/publicapis-upstream-*`。
+本輪只審高於既有水位的新項目；低於水位的既有 open proposals 不宣稱本輪重新覆核。
+Defer 表中的明確觸發條件仍有效；水位代表已審查，並非已採用所有提案。
+
+**驗證順序**：先跑受影響離線測試與 Windows canonical gate，再更新三軸水位；最後以真實
+`check_upstream_updates.py --strict` 驗證 commit／PR／issue 三軸均無新待審項。沒有弱化 strict gate。
+
 ## 2026-08-31：同步 README 的 10 個上游 API 條目
 
 **決定**：採用 `988c57be..9dfcbca` 的 20 個提交；它們全部只新增 `README.md` 的 10 行目錄內容，

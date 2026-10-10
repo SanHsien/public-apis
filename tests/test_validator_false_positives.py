@@ -14,9 +14,12 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts" / "validate"))
 
 import format as validator  # noqa: E402
+import links as link_validator  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -80,3 +83,17 @@ def test_link_checker_does_not_pin_the_host_header() -> None:
     source = (ROOT / "scripts" / "validate" / "links.py").read_text(encoding="utf-8")
 
     assert "'host': get_host_from_link(link)" not in source
+
+
+@pytest.mark.parametrize("urls, expected", [
+    (["https://a.invalid/", "https://a.invalid", "https://a.invalid/"],
+     ["https://a.invalid"]),
+    (["https://a.invalid", "https://b.invalid", "https://a.invalid",
+      "https://b.invalid/", "https://a.invalid/", "https://b.invalid"],
+     ["https://a.invalid", "https://b.invalid"]),
+    (["https://a.invalid", "https://b.invalid"], []),
+])
+def test_duplicate_urls_are_reported_once_in_detection_order(urls, expected) -> None:
+    original = list(urls)
+    assert link_validator.check_duplicate_links(urls) == (bool(expected), expected)
+    assert urls == original
