@@ -1,8 +1,7 @@
 version: 2
 updates:
-  # 只顧本 fork 的開發閘門（requirements-dev.txt）。上游的
-  # scripts/requirements.txt 是 2021 年的 pin，給上游自己的 Ubuntu 3.8 CI 用；
-  # 本 fork 不幫上游升級那些 pin，所以不納入。
+  # 根目錄 requirements-dev.txt 引用 scripts/requirements.txt；
+  # 兩份 manifest 都由本 fork 維護，必須一起通過 resolver 與 CI。
   - package-ecosystem: "pip"
     directory: "/"
     schedule:

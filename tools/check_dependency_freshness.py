@@ -25,9 +25,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 USER_AGENT = "public-apis-fork-dependency-freshness"
 
-# This fork declares its dependencies in one place. The list stays a tuple so a
-# second requirements file can be added without touching anything else.
-REQUIREMENT_FILES = ("requirements-dev.txt",)
+# Enumerate the included validator manifest as well as the development tools.
+REQUIREMENT_FILES = ("requirements-dev.txt", "scripts/requirements.txt")
 
 _REQUIREMENT_RE = re.compile(r"^([A-Za-z0-9_.-]+)(?:\[[^\]]+\])?\s*(.*)$")
 _MINIMUM_RE = re.compile(r"(>=|>|==|~=)\s*([0-9][0-9A-Za-z.!+_-]*)")
@@ -185,9 +184,8 @@ def render_markdown(rows: list[dict[str, object]], error: str | None = None) -> 
             "",
             "1. Read the release notes, and check the supported Python versions.",
             "2. Run `python -m pytest` and `ruff check` before widening a range.",
-            "3. Only this fork's gate is covered here. `scripts/requirements.txt` holds",
-            "   upstream's 2021 pins for its own Ubuntu 3.8 CI; this fork does not",
-            "   upgrade them on upstream's behalf.",
+            "3. Both requirements-dev.txt and scripts/requirements.txt are maintained",
+            "   and installed by this fork's Python 3.10+ development gate.",
             "",
         ]
     )
