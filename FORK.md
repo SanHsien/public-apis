@@ -17,7 +17,7 @@
 | 項目 | 說明 |
 |---|---|
 | `README.md` | **不翻譯、不改寫。** 這份 1000+ API 目錄就是產品，保持上游英文為單一真相源 |
-| `AGENTS.md` / `CLAUDE.md` | 本 fork 的 AI 維護單一真相源 |
+| `AGENTS.md` | 本 fork 的 AI 維護單一真相源 |
 | `NOTICE.md` / `FORK.md` | 來源、授權與同步說明 |
 | `tools/dev_check.ps1` | Windows 本機一鍵 gate |
 | `.github/workflows/ci.yml` | 新增 Ubuntu 3.12／3.14 + Windows 3.14：pytest / ruff / 上游 unittest / 維護文件連結 |
