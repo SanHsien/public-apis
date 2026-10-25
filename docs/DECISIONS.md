@@ -19,8 +19,8 @@ README 依單一真相源政策整檔同步；本 fork 的 README 與前次基�
   抽查 #8393 只在 `format.py` 加一行 docstring，不改行為。觸發條件：出現改動 `scripts/validate/` 邏輯的版本。
 - 不適用 #8197（只改上游三支 workflow；本 fork 這三支保留官方 repo guard、不在 fork 執行，日常 CI 在 `ci.yml`）。
 - 其餘依判準五視為投稿佇列：329 筆 open 且只動 README 的目錄投稿、83 筆已合併（隨 commit 抵達）、
-  17 筆 closed（#8335 撤回、12 筆 README 單條投稿被上游關閉，另 #8257／#8113／#8082／#8025 為與本專案無關的學生作業檔）——
-  關閉未合併者不收。#7933（GDELT，同時改 `scripts/requirements.txt`）與 #8382（誤傳 `public-apis` 檔）亦屬投稿，不收。
+  17 筆 closed（#8335 撤回、12 筆 README 單條投稿被上游關閉，另 #8257／#8113／#8082／#8025 為與本專案無關的學生作業檔；open 的 #8256 同類）——
+  關閉未合併者不收。#7933（GDELT，同時改 `scripts/requirements.txt` 與 `links.py` 的 `seen[link] += 1`，後者本 fork 已於 2026-10-10 採用，見 `scripts/validate/links.py` 的 `check_duplicate_links`）與 #8382（誤傳 `public-apis` 檔）亦屬投稿，不收。
 
 **issue**（`--state all`，#7767 以上共 13 筆，全為 open）：多為無內容或誤開的標題，
 #8275 為釣魚活動通報，#8179 建議移除 Astrology 分類，屬策展、為上游職責。沒有任何項涉及驗證腳本。全部 reject。
