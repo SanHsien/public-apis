@@ -1,5 +1,32 @@
 # 維護決策
 
+## 2026-10-25：405 個上游提交與 PR／issue 三軸審查（874e587 → 82e763e）
+
+**commit**：`874e587..82e763e` 共 405 筆，只動 `README.md`（catalog 條目）與 `scripts/requirements.txt` 一行。
+README 依單一真相源政策整檔同步；本 fork 的 README 與前次基線逐位元組相同，無 overlay。
+
+- 拒絕 `cfadd522`（`requests==2.27.1` → `requests>=2.32.4`，為 CVE-2024-47081）：
+  上游的理由是它的 `scripts/requirements.txt` 只有舊精確釘版。本 fork 已在 2026-10-10 協調升級 requests／urllib3／certifi 等，
+  並以精確釘版維持可重現與新鮮度比對（`FORK.md`「依賴與 Python 契約」），放寬下限會讓比對失去基準。
+  觸發條件：本 fork 的 requests 低於 2.32.4，或改成不釘版。
+
+**PR**（`--state all`，#7897..#8394 共 443 筆：343 open／83 merged／17 closed）：
+
+- 採用 #7930（`check_description` 對空描述 `description[0]` 拋 `IndexError`，`check_entry` 跟著崩潰）。
+  先在本 fork 的 `scripts/validate/format.py` 實測重現（`check_description(0, '')` 與含空描述的 `check_entry` 都拋 `IndexError`），
+  再以同設計修正並加兩個測試；訊息為 `description must not be empty`。
+- 拒絕 9 筆「Fix: Public APIs Situation」（#7908、#7945、#7990、#8008、#8041、#8126、#8156、#8185、#8393）：
+  抽查 #8393 只在 `format.py` 加一行 docstring，不改行為。觸發條件：出現改動 `scripts/validate/` 邏輯的版本。
+- 不適用 #8197（只改上游三支 workflow；本 fork 這三支保留官方 repo guard、不在 fork 執行，日常 CI 在 `ci.yml`）。
+- 其餘依判準五視為投稿佇列：329 筆 open 且只動 README 的目錄投稿、83 筆已合併（隨 commit 抵達）、
+  17 筆 closed（#8335 撤回、12 筆 README 單條投稿被上游關閉，另 #8257／#8113／#8082／#8025 為與本專案無關的學生作業檔）——
+  關閉未合併者不收。#7933（GDELT，同時改 `scripts/requirements.txt`）與 #8382（誤傳 `public-apis` 檔）亦屬投稿，不收。
+
+**issue**（`--state all`，#7767 以上共 13 筆，全為 open）：多為無內容或誤開的標題，
+#8275 為釣魚活動通報，#8179 建議移除 Astrology 分類，屬策展、為上游職責。沒有任何項涉及驗證腳本。全部 reject。
+
+水位：commit `82e763ed`、PR #8394、issue #8275。
+
 ## 2026-10-10：修復已發布 CI 文件契約，延期新增目錄 PR
 
 **根因**：`975364bf` 的 CI run `38055443269` 在

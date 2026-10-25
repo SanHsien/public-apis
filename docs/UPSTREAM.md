@@ -34,6 +34,14 @@ Baseline 代表「已審查」，不代表「全部已合併」。
 
 `README.md` 新條目直接同步，不必翻譯。若上游改了 `scripts/validate/` 或 GitHub Actions，才需要核對本 fork 的 Windows gate 是否仍能跑。
 
+## 2026-10-25：審至 `82e763e`
+
+- commit：`874e587..82e763e` 共 405 筆，只動 `README.md` 與 `scripts/requirements.txt`；README 整檔同步，requirements 放寬不採（見 DECISIONS）。
+- PR：`#7897..#8394` 共 443 筆，採用 #7930（空描述不再讓 `format.py` 拋 `IndexError`），其餘為目錄投稿或無行為變更而不收。
+- issue：`#7767..#8275` 共 13 筆，無涉驗證腳本。
+
+水位已寫入 `tools/upstream_baseline.json`：commit `82e763edc4919e2cb13ce8c8c57a33bc73ff4caf`、PR #8394、issue #8275。
+
 ## 2026-10-10：審至 `874e587`，補正最終 baseline／文件驗證
 
 - commit：`8939d468..874e587` 共 198 筆（192 catalog、5 merge、1 duplicate-links validator fix）。
