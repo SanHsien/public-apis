@@ -12,6 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 BASELINE_PATH = REPO_ROOT / "tools" / "upstream_baseline.json"
 UPSTREAM_REF_PREFIX = "refs/upstream-check"
 DEFAULT_DECISION_LOG = "docs/DECISIONS.md"
+TICKET_LIMIT = 1000
 
 
 class UpstreamCheckError(RuntimeError):
@@ -137,7 +138,7 @@ def collect_new_tickets(baseline: dict, kind: str) -> list[dict] | None:
         result = subprocess.run(
             [
                 "gh", kind, "list", "--repo", slug, "--state", "all",
-                "--limit", "1000", "--json", "number,title",
+                "--limit", str(TICKET_LIMIT), "--json", "number,title",
             ],
             capture_output=True,
             text=True,
@@ -155,6 +156,11 @@ def collect_new_tickets(baseline: dict, kind: str) -> list[dict] | None:
     try:
         items = json.loads(result.stdout)
     except ValueError:
+        return None
+    # gh lists newest first and stops at --limit. If even the oldest row it
+    # returned is above the watermark, older unreviewed items were cut off and
+    # the list is not complete -- report "not checked", not a short list.
+    if len(items) >= TICKET_LIMIT and min(item["number"] for item in items) > watermark:
         return None
     return sorted(
         (item for item in items if item["number"] > watermark),
