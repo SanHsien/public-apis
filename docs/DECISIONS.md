@@ -1,5 +1,28 @@
 # 維護決策
 
+## 2026-10-26：PR #8395..#8436 與 issue #8416、#8433 審查（commit 無新增）
+
+**commit**：`82e763ed` 之後上游 `master` 沒有新提交，水位不變。
+
+**PR**（`--state all`，#8395..#8436 共 32 筆，全為 OPEN）。每筆都取目前 head SHA、讀完整 diff，並依 PLAYBOOK 判準八掃隱藏內容：
+32 份 diff 都沒有新增行裡的長空白夾帶、沒有 Unicode `Cf`／`Cc` 控制或零寬字元、沒有 `eval`／`exec`／`<script`／`javascript:`／長 base64；
+唯一超過 400 字元的新增行是 #8411 的單行 README 表格列（506 字元，內容是 MCP 條目與數個 registry 連結，不含程式）。
+
+| 分類 | 筆數 | 判定 |
+| --- | --- | --- |
+| 只在 `README.md` 新增 1 行的目錄投稿 | 30 | 不收（判準五）：#8395、#8396、#8397、#8402、#8403、#8404、#8406、#8407、#8408、#8409、#8410、#8411、#8412、#8413、#8414、#8415、#8417、#8421、#8422、#8423、#8424、#8425、#8426、#8427、#8429、#8430、#8431、#8432、#8435、#8436。全部 OPEN，是上游還沒接受的投稿；被上游接受後會經 commit 軸抵達。觸發條件：上游合併。 |
+| #8398 `Improve deprecated API link error reporting`（`scripts/validate/links.py` +4/-1、`scripts/tests/test_validate_links.py` +36） | 1 | 不採用：不是缺陷修正，只是把 HTTP 410 的錯誤標籤由 `ERR:CLT: 410` 改成 `ERR:DEP: API deprecated (410 Gone)`。本 fork `scripts/validate/links.py:178-180` 的 `code >= 400` 分支已經把 410 報成錯誤（連結不會被放過），沒有任何程式解析 `ERR:` 前綴（`grep -rn "ERR:" --include=*.py --include=*.sh --include=*.yml .` 只命中 `links.py` 自己的 6 個賦值）。觸發條件：上游合併，且 fork 需要把「已下架」與一般 4xx 分開統計。 |
+| #8428 `Fix: Public APIs Situation [ READ THIS ISSUE PLEASE ]`（`scripts/validate/format.py` +1/-0） | 1 | 拒絕：只在 `error_message()` 加 `"""Auto-generated docstring."""`，不改行為；與 2026-10-25 已拒絕的 9 筆同一類（#7908、#7945、#7990、#8008、#8041、#8126、#8156、#8185、#8393）。觸發條件：出現改動 `scripts/validate/` 邏輯的版本。 |
+
+**issue**（`--state all`，2 筆，全為 OPEN）：
+
+- #8416「Add official Git MCP server to MCP Servers」：要求新增目錄條目，對應 #8417 的投稿；屬策展，上游職責。不收。
+- #8433「Tough time connecting currency API last 3 days」：使用者對第三方 API（APILayer）連線不穩的詢問，附 CISA 公告連結；無驗證腳本或目錄格式問題。不收。
+
+編號 #8399、#8400、#8401、#8405、#8418、#8419、#8420、#8434 以 `gh api repos/public-apis/public-apis/issues/<n>` 查回 404（已刪除或不存在），不是漏審。
+
+水位：commit `82e763ed`（不變）、PR #8394 -> #8436、issue #8275 -> #8433。
+
 ## 2026-10-25：405 個上游提交與 PR／issue 三軸審查（874e587 → 82e763e）
 
 **commit**：`874e587..82e763e` 共 405 筆，只動 `README.md`（catalog 條目）與 `scripts/requirements.txt` 一行。

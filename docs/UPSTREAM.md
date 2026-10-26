@@ -34,6 +34,14 @@ Baseline 代表「已審查」，不代表「全部已合併」。
 
 `README.md` 新條目直接同步，不必翻譯。若上游改了 `scripts/validate/` 或 GitHub Actions，才需要核對本 fork 的 Windows gate 是否仍能跑。
 
+## 2026-10-26：PR 審至 #8436、issue 審至 #8433
+
+- commit：`82e763ed` 之後無新提交，水位不變。
+- PR：`#8395..#8436` 共 32 筆（全 OPEN），30 筆為 README 單行目錄投稿、#8398（410 錯誤標籤改名，非缺陷）與 #8428（純 docstring）均不收；每筆都取目前 head 並掃過隱藏內容，無命中（見 DECISIONS）。
+- issue：`#8416`（要求新增 Git MCP 條目）與 `#8433`（第三方 API 連線詢問）不收。
+
+水位已寫入 `tools/upstream_baseline.json`：commit `82e763edc4919e2cb13ce8c8c57a33bc73ff4caf`、PR #8436、issue #8433。
+
 ## 2026-10-25：審至 `82e763e`
 
 - commit：`874e587..82e763e` 共 405 筆，只動 `README.md` 與 `scripts/requirements.txt`；README 整檔同步，requirements 放寬不採（見 DECISIONS）。
