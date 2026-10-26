@@ -238,9 +238,14 @@ def main() -> int:
         write_github_output(rows, output_path)
     if error:
         return 2
-    if args.strict and any(
-        (bool(row["outdated"]) and not row.get("hold")) or bool(row["check_failed"])
-        for row in rows
+    # No rows means no requirement was parsed, which --github-output already
+    # reports as check_failed; --strict must not read it as a clean pass.
+    if args.strict and (
+        not rows
+        or any(
+            (bool(row["outdated"]) and not row.get("hold")) or bool(row["check_failed"])
+            for row in rows
+        )
     ):
         return 1
     return 0
