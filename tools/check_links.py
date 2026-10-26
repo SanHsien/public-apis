@@ -18,6 +18,12 @@ from urllib.parse import unquote
 ROOT = Path(__file__).resolve().parent.parent
 LINK_PATTERN = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 SKIP_PREFIXES = ("http://", "https://", "mailto:", "tel:", "#")
+# Code is not prose: a link written inside a fence or backticks is an example.
+FENCED_CODE = re.compile(
+    r"^ {0,3}(`{3,}|~{3,})[^\n]*\n.*?(?:^ {0,3}\1[`~]*[ \t]*$|\Z)",
+    re.DOTALL | re.MULTILINE,
+)
+INLINE_CODE = re.compile(r"(`+)(?:(?!\1).)+?\1")
 
 
 SKIP_RELATIVE = {
@@ -43,10 +49,20 @@ def iter_documents() -> list[Path]:
     )
 
 
+def link_destination(raw: str) -> str:
+    """The path of `[x](path "title")`; `<...>` allows spaces in the path."""
+    raw = raw.strip()
+    if raw.startswith("<") and ">" in raw:
+        return raw[1 : raw.index(">")].strip()
+    return raw.split(None, 1)[0] if raw else ""
+
+
 def check_document(path: Path) -> list[str]:
     problems: list[str] = []
-    for match in LINK_PATTERN.finditer(path.read_text(encoding="utf-8")):
-        target = match.group(1).strip().strip("<>")
+    text = FENCED_CODE.sub("", path.read_text(encoding="utf-8"))
+    text = INLINE_CODE.sub("", text)
+    for match in LINK_PATTERN.finditer(text):
+        target = link_destination(match.group(1))
         if not target or target.startswith(SKIP_PREFIXES):
             continue
         file_part = unquote(target.split("#", 1)[0])
