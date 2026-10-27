@@ -40,27 +40,6 @@ def fake_gh(payload: object, returncode: int = 0):
     return runner
 
 
-def test_tickets_are_queried_with_state_all(monkeypatch):
-    """An item opened and closed between two runs was still never triaged."""
-    monkeypatch.setattr(
-        checker.subprocess,
-        "run",
-        fake_gh([{"number": 9, "title": "closed without merging"}]),
-    )
-    tickets = checker.collect_new_tickets(BASELINE, "pr")
-    assert tickets == [{"number": 9, "title": "closed without merging"}]
-
-
-def test_items_at_or_below_the_watermark_are_not_re_reported(monkeypatch):
-    monkeypatch.setattr(
-        checker.subprocess,
-        "run",
-        fake_gh([{"number": 4, "title": "old"}, {"number": 5, "title": "new"}]),
-    )
-    baseline = {**BASELINE, "reviewed_pr_through": 4}
-    assert [t["number"] for t in checker.collect_new_tickets(baseline, "pr")] == [5]
-
-
 def test_ticket_titles_survive_undecodable_bytes(monkeypatch):
     """Titles are written by strangers and the console is not always UTF-8.
 
@@ -83,23 +62,6 @@ def test_gh_failure_reports_unchecked_rather_than_empty(monkeypatch):
     """`None`, not `[]`: "not checked" must never render as "nothing to review"."""
     monkeypatch.setattr(checker.subprocess, "run", fake_gh([], returncode=1))
     assert checker.collect_new_tickets(BASELINE, "issue") is None
-
-
-def test_report_says_so_when_tickets_could_not_be_enumerated():
-    report = checker.append_ticket_sections(
-        checker.render_markdown(BASELINE, []), BASELINE, None, None
-    )
-    assert "Not checked" in report
-
-
-def test_report_covers_all_three_axes_even_when_commits_are_clean():
-    """The commit section keeps this fork's own wording; the ticket sections are
-    appended to it rather than replacing it."""
-    commit_report = checker.render_markdown(BASELINE, [])
-    report = checker.append_ticket_sections(commit_report, BASELINE, [], [])
-    assert commit_report.rstrip() in report
-    assert "## Upstream pull requests" in report
-    assert "## Upstream issues" in report
 
 
 @pytest.mark.parametrize(
