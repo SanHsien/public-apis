@@ -1,5 +1,35 @@
 # 維護決策
 
+## 2026-10-28：commit 82e763e → 9fb5cd0、PR #8438..#8508 與 issue #8473..#8498 審查
+
+**commit**（2 筆：`f088d146` 與其 merge `9fb5cd0b`，上游 PR #8475）：只動 `README.md` +13/-0，位置在 `## Learn more about Public APIs` 之下、`Get Involved` 之前，
+新增一段 publicapis.lol 網站導覽（1 行粗體標題、1 行說明、8 個帶 `utm_source=github` 的連結）。不是目錄條目。
+- 採用（整檔同步）：`git checkout upstream/master -- README.md`；本 fork 的 README 與 `82e763e` 逐位元組相同、無 overlay，同步後與 `upstream/master` 零差異。
+  理由：`FORK.md` 規定 README 以上游為單一真相源，漏掉這 13 行就是在 README 上留下一個每次同步都要手動保留的永久 patch。
+- 對內容的保留意見（記下來，不阻擋同步）：該段自稱 publicapis.lol 是「official home of public-apis」，是站點營運者的主張（判準七：主詞是 PR 作者 heyOnuoha 的網站），不是本 fork 的主張；本 fork 不當第二個官方產品站（`FORK.md`）。
+  新增行掃過隱藏內容：無長空白夾帶、無控制或零寬字元、無 `eval`／`<script`／長 base64。
+  觸發條件：上游移除該段（隨 commit 軸抵達即可）；或維護者決定 fork README 不鏡像外部站點導覽，則於下次同步保留這 13 行的差異並在此改記為 overlay。
+
+**PR**（`--state all`，#8438..#8508 共 62 筆：60 open／1 merged／1 closed 未合併）。每筆取目前 head SHA、讀完整 diff，並依判準八掃隱藏內容
+（新增行的 `\S\s{40,}\S`、超過 600 字元、`eval(`／`new Function(`／`globalThis`／`<script`／`javascript:`／`exec(`、80 字元以上 base64 樣式、Unicode 控制與零寬字元）：62 份 diff 全部無命中。
+
+| 分類 | 筆數 | 判定 |
+| --- | --- | --- |
+| 只在 `README.md` 新增 1 行（#8441 為 2 行：1 空行＋1 條目）的目錄投稿，全部 OPEN | 57 | 不收（判準五）：#8438 #8439 #8440 #8441 #8442 #8443 #8444 #8445 #8446 #8447 #8448 #8449 #8450 #8451 #8452 #8453 #8454 #8455 #8457 #8458 #8459 #8460 #8461 #8462 #8463 #8465 #8466 #8467 #8468 #8469 #8470 #8471 #8472 #8479 #8481 #8482 #8484 #8485 #8486 #8488 #8489 #8490 #8491 #8493 #8494 #8495 #8496 #8497 #8499 #8500 #8501 #8502 #8503 #8504 #8505 #8506 #8508。上游還沒接受，替上游決定收錄不是 fork 的工作；接受後經 commit 軸抵達。觸發條件：上游合併。 |
+| #8475 `Add publicapis.lol …`（README +13，已合併） | 1 | 已隨 commit `f088d146` 同步，見上。 |
+| #8483 `Add FlyItalyADSB API`（README +1，CLOSED 未合併，2026-10-27 關閉） | 1 | 不收：上游關閉未合併，且同作者的 #8467 為同一條目（OPEN）。關閉未合併者不收。 |
+| #8492 `docs: fix multiple spelling and grammar typos in README`（README +3/-3，OPEN） | 1 | 不收：改的是目錄內容（標題 `in`→`is`、Systembolaget 描述、HKO 名稱）；本 fork 的 README 為上游鏡像（`FORK.md`），自行改字會在下次整檔同步時成為衝突。屬上游職責；上游合併後經 commit 軸抵達。觸發條件：上游合併。 |
+| #8456、#8507 `Fix: Public APIs Situation [ READ THIS ISSUE PLEASE ]`（`scripts/validate/format.py` +1/-0，OPEN） | 2 | 拒絕：只在 `error_message()` 加 `"""Auto-generated docstring."""`，不改行為；與 2026-10-26 已拒絕的 #8428 及 2026-10-25 的 9 筆同一類。本 fork 對應檔 `scripts/validate/format.py` 與這個位置沒有缺陷可修。觸發條件：出現改動 `scripts/validate/` 邏輯的版本。 |
+
+編號 #8437、#8464、#8487 以 `gh api repos/public-apis/public-apis/issues/<n>` 查回 404（已刪除或不存在）；#8473、#8474、#8476、#8477、#8478、#8480、#8498 是 issue（見下），不是漏審的 PR。
+
+**issue**（`--state all`，7 筆，全為 OPEN）：
+
+- #8473、#8474、#8476、#8477、#8478、#8480「Add API: Lightning-Gated L402 AI Assistant」：同一帳號（conorhonor111-art）貼了 6 份逐位元組相同的內文（body md5 相同），投稿一個走 `loca.lt` 臨時隧道網址的服務。屬目錄投稿（策展、上游職責）且是重複；網址是臨時隧道，不是穩定 API。不收。
+- #8498「【收錄】丙大山AI · bingdashan」：要求把站點收錄進目錄的自我推廣，無驗證腳本或目錄格式問題。不收。
+
+水位：commit `82e763ed` → `9fb5cd0b`、PR #8436 → #8508、issue #8433 → #8498。
+
 ## 2026-10-26：PR #8395..#8436 與 issue #8416、#8433 審查（commit 無新增）
 
 **commit**：`82e763ed` 之後上游 `master` 沒有新提交，水位不變。
