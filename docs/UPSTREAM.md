@@ -34,6 +34,14 @@ Baseline 代表「已審查」，不代表「全部已合併」。
 
 `README.md` 新條目直接同步，不必翻譯。若上游改了 `scripts/validate/` 或 GitHub Actions，才需要核對本 fork 的 Windows gate 是否仍能跑。
 
+## 2026-11-02：審至 `2676ca4`
+
+- commit：`9fb5cd0..2676ca4` 共 163 筆，只動 `README.md`（+80/-14，策展結果）；README 整檔同步，與 `upstream/master` 零差異。
+- PR：`#8509..#8680` 共 150 筆，134 筆 README 新增條目（OPEN）、6 筆已合併隨 commit 抵達、#8611 關閉未合併、#8563／#8679 條目修改、#8588 投稿（且會誤刪四筆既有條目）、#8671 要移除 publicapis.lol 導覽段（未合併）、5 筆純 docstring（`format.py`）均不另收；每筆都取目前 head 並掃過隱藏內容，無命中。
+- issue：`#8561..#8666` 共 5 筆（2 筆要求上游改寫歷史、1 筆 publicapis.lol 連結 402（實測已恢復 200）、2 筆空內文）不收。
+
+水位已寫入 `tools/upstream_baseline.json`：commit `2676ca49d557ef14a0f478311506dae947639028`、PR #8680、issue #8666。
+
 ## 2026-10-28：審至 `9fb5cd0`
 
 - commit：`82e763e..9fb5cd0` 共 2 筆（`f088d146` 與 merge `9fb5cd0b`，上游 PR #8475），只動 `README.md` +13（publicapis.lol 網站導覽段）；README 整檔同步（見 DECISIONS 的保留意見）。

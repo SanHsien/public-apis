@@ -1,5 +1,31 @@
 # 維護決策
 
+## 2026-11-02：commit 9fb5cd0 → 2676ca4、PR #8509..#8680 與 issue #8561..#8666 審查
+
+**commit**（163 筆，`9fb5cd0b..2676ca49`）：`git diff --name-only 9fb5cd0 upstream/master` 只有 `README.md`（+80/-14）；`scripts/`、`.github/` 無變動，不涉驗證腳本與 workflow。
+- 採用（整檔同步）：`git checkout upstream/master -- README.md`；本 fork 的 README 與 `9fb5cd0` 逐位元組相同（`git diff 9fb5cd0 HEAD -- README.md` 無輸出）、無 overlay，同步後與 `upstream/master` 零差異。理由同 2026-10-28：`FORK.md` 規定 README 以上游為單一真相源。
+- 這 163 筆是上游的策展結果（新增條目、移除失效條目如 `77db474`、`9dd709e`、更新描述）；本 fork 不逐筆審條目內容（判準五）。同步後 `python scripts/validate/format.py README.md` 仍回報上游自己的格式錯誤（例如 L2394、L2402），這些是上游條目的問題，不是 fork 缺陷，修了會在下次整檔同步時成為衝突；`tools/dev_check.ps1` 的 pytest 與 `scripts/tests` 全綠。
+  觸發條件：上游改動 `scripts/validate/` 或 workflow；或維護者決定 fork 不接受帶格式錯誤的 README。
+
+**PR**（`--state all`，#8509..#8680 共 150 筆，編號缺口是 issue 或已刪除）。每筆取 2026-11-02 當下的 head、讀完整 diff，依判準八掃隱藏內容（新增行的 `\S\s{40,}\S`、超過 600 字元、`eval(`／`new Function(`／`globalThis`／`<script`／`javascript:`／`exec(`、80 字元以上 base64 樣式、Unicode 控制與零寬字元）：150 份 diff 全部無命中。
+
+| 分類 | 筆數 | 判定 |
+| --- | --- | --- |
+| 只在 `README.md` 新增條目的目錄投稿，全部 OPEN（131 筆各 +1 行；#8516、#8532 各 +2 行，同一服務的 API 與 MCP 兩條；#8614 +5 行） | 134 | 不收（判準五）：投稿佇列，上游尚未接受。被接受後經 commit 軸抵達；#8611 已因與 #8612 重複被上游關閉。 |
+| 已合併：#8530、#8549、#8550、#8555、#8568、#8626（各 README +1/-1） | 6 | 已隨 commit 抵達：`git log 9fb5cd0..upstream/master --grep="#<編號>"` 每個編號各命中 1 筆（判準三）。 |
+| #8611 `Add Veridion MCP server`（README +1，CLOSED 未合併） | 1 | 不收：上游關閉未合併，且與同題的 #8612（OPEN）重複；關閉未合併者不收（判準五）。 |
+| #8563、#8679 README 單行修改（#8563 RevCarData 描述、#8679 PVWatts 文件網址 `nrel.gov`→`nlr.gov`），OPEN | 2 | 不收：改的是目錄內容，上游職責；本 fork 的 README 是上游鏡像，自行改會在下次整檔同步成為衝突。觸發條件：上游合併（經 commit 軸抵達）。 |
+| #8588 `Add webcapture …`（README +1/-4，OPEN） | 1 | 不收：投稿；且該 diff 同時刪掉 Timezones、ConsumerSun Recalls、Molicheck、BoltPatternHQ 四個已在 `upstream/master` 的條目（分支基底較舊），照收會誤刪。 |
+| #8671（README -13，OPEN） | 1 | 不收，但記下：它要移除 2026-10-28 同步進來的 publicapis.lol 導覽段（`README.md:98-110`）。這正是 2026-10-28 條目寫的觸發條件「上游移除該段」，上游尚未合併；合併後經 commit 軸抵達，不需要另行處理。 |
+| #8544、#8571、#8604、#8632、#8667 `Fix: Public APIs Situation [ READ THIS ISSUE PLEASE ]`（`scripts/validate/format.py` +1/-0，OPEN） | 5 | 拒絕：五份 diff 的 md5 相同，只在 `error_message()` 加 `"""Auto-generated docstring."""`，不改行為；與 2026-10-25／10-26／10-28 已拒絕的同一類（#7908…#8393、#8428、#8456、#8507）。本 fork 對應檔 `scripts/validate/format.py` 在該位置沒有缺陷可修。觸發條件：出現改動 `scripts/validate/` 邏輯的版本。 |
+
+**issue**（`--state all`，5 筆，全為 OPEN）：
+- #8561、#8566：兩位貢獻者要求上游用 `git filter-repo` 改寫 `9cb1100472` 等已合併提交的作者 email 並 force-push。屬上游的歷史治理，不是 fork 缺陷；本 fork 不改寫歷史（有人 fork 的 repo 不做歷史壓縮／改寫），也不對上游做任何動作。觸發條件：上游真的改寫歷史——屆時同步要先確認 `upstream/master` 與 `9fb5cd0`／`2676ca4` 的祖先關係，不能直接 fast-forward。
+- #8666：回報 README 的 publicapis.lol 八個連結回 HTTP 402（`x-vercel-error: DEPLOYMENT_DISABLED`）。2026-11-02 實測 `https://publicapis.lol/`、`/search`、`/status`、`/mcp` 都回 200，連結目前可用；若再斷，與 #8671 同一條線，由上游處理。不採用。
+- #8647 `sistem ai`、#8660 `Public APIs`：內文為空（長度 0），無可處理內容。不收。
+
+水位：commit `9fb5cd0b` → `2676ca49`、PR #8508 → #8680、issue #8498 → #8666。
+
 ## 2026-10-28：commit 82e763e → 9fb5cd0、PR #8438..#8508 與 issue #8473..#8498 審查
 
 **commit**（2 筆：`f088d146` 與其 merge `9fb5cd0b`，上游 PR #8475）：只動 `README.md` +13/-0，位置在 `## Learn more about Public APIs` 之下、`Get Involved` 之前，
