@@ -34,6 +34,13 @@ Baseline 代表「已審查」，不代表「全部已合併」。
 
 `README.md` 新條目直接同步，不必翻譯。若上游改了 `scripts/validate/` 或 GitHub Actions，才需要核對本 fork 的 Windows gate 是否仍能跑。
 
+## 2026-11-04：PR 審至 `#8739`
+
+- Upstream check 紅燈原因：PR 軸 58 筆未審項（`#8681..#8739`），不是 workflow 壞掉；commit 與 issue 軸無新增。
+- 採用 #8736（`links.py` 超時分類，ReadTimeout／ConnectTimeout 改報 `ERR:TMO`），同設計重做並加測試；其餘 52 筆目錄投稿、1 筆已關閉、#8732 docstring、#8683（fork 已有 #7930）、#8735／#8737（上游 guard 下的 workflow／腳本）均不收，理由見 DECISIONS。
+
+水位：commit 不變（`2676ca49d557ef14a0f478311506dae947639028`）、PR #8739、issue #8666。
+
 ## 2026-11-02：審至 `2676ca4`
 
 - commit：`9fb5cd0..2676ca4` 共 163 筆，只動 `README.md`（+80/-14，策展結果）；README 整檔同步，與 `upstream/master` 零差異。

@@ -1,5 +1,25 @@
 # 維護決策
 
+## 2026-11-04：PR #8681..#8739 審查（commit 無新增，水位仍 2676ca4）
+
+**Upstream check 紅燈原因**：不是 workflow 壞掉，是上游有新東西——`--strict` 在 PR 軸找到 58 筆未審項（commit、issue 軸皆無新增，behind 0）。11-02 的 push 觸發那次已因同樣原因失敗，之後排程持續失敗到本輪審完為止。workflow 本身（`GH_TOKEN`、`continue-on-error`、報告發佈）運作正常。
+
+**PR**（`--state all`，#8681..#8739 共 58 筆：57 open／1 closed 未合併）。每筆取 2026-11-04 當下的 head、讀完整 diff，依判準八掃隱藏內容（樣式同 2026-11-02 條目）：58 份 diff 全部無命中。
+
+| 分類 | 筆數 | 判定 |
+| --- | --- | --- |
+| 只改 `README.md` 的目錄投稿／條目修改（OPEN） | 52 | 不收（判準五）：#8681、#8682、#8684、#8685、#8686、#8687、#8688、#8689、#8690、#8691、#8692、#8693、#8694、#8695、#8696、#8697、#8698、#8699、#8700、#8701、#8702、#8703、#8704、#8705、#8706、#8707、#8708、#8709、#8710、#8711、#8712、#8713、#8714、#8715、#8716、#8717、#8718、#8719、#8720、#8721、#8722、#8724、#8725、#8726、#8727、#8728、#8730、#8731、#8733、#8734、#8738、#8739。上游尚未接受，替上游決定收錄不是 fork 的工作；接受後經 commit 軸抵達。觸發條件：上游合併。 |
+| #8723 `Add PW API`（README，CLOSED 未合併） | 1 | 不收：上游關閉，收進來等於放回不合格條目。 |
+| #8732 `Fix: Public APIs Situation`（`format.py` 加一行 docstring） | 1 | 拒絕：不改行為，與 #7908 等 9 筆同型（見 2026-10-25）。 |
+| #8683 空描述 `IndexError`（`format.py`＋2 測試） | 1 | 不採用：fork 已於 2026-10-25 以 #7930 同設計修正（`check_description` 對空字串回 `description must not be empty`）。該 PR 多出的「純空白描述」分支在 fork 不可達——`check_entry` 以 `strip()` 切欄位，純空白會先變成空字串。觸發條件：`format.py` 改成不 strip 欄位。 |
+| #8735 `validate_links.yml` 上傳 broken_links 與 job summary | 1 | 不適用：該 workflow 在 fork 有 `github.repository == 'public-apis/public-apis'` guard，不在 fork 執行（同 #8197 判定）。 |
+| #8737 `github_pull_request.sh` 以 `grep -E '^\+[^+]'` 取代 `egrep "\+"` | 1 | 不適用：呼叫它的 `test_of_push_and_pull.yml` 同樣帶上游 guard，fork 不執行該腳本。觸發條件：fork 開始跑該腳本。 |
+| #8736 `links.py` 超時分類 `ERR:TMO` | 1 | **採用**（同設計重做、自寫測試）：實測 `requests.exceptions.ReadTimeout` 落到 `ERR:UKN`；`ConnectTimeout` 是 `ConnectionError` 子類，先被 `ERR:CNT` 攔走（原 `(TimeoutError, ConnectTimeout)` clause 永遠到不了）。先在 `scripts/tests/test_validate_links.py` 加 `TestCheckIfLinkIsWorkingTimeouts`，紅燈 2 failed（read／connect timeout），再把 `except (TimeoutError, requests.exceptions.Timeout)` 移到 `ConnectionError` 之前，轉綠。 |
+
+**Issue**：`#8666` 之後無新增，水位不變。
+
+**驗證**：`tools/dev_check.ps1` 全 gate 與水位推進後的真實 `check_upstream_updates.py --strict`，結果見提交。
+
 ## 2026-11-02：commit 9fb5cd0 → 2676ca4、PR #8509..#8680 與 issue #8561..#8666 審查
 
 **commit**（163 筆，`9fb5cd0b..2676ca49`）：`git diff --name-only 9fb5cd0 upstream/master` 只有 `README.md`（+80/-14）；`scripts/`、`.github/` 無變動，不涉驗證腳本與 workflow。
