@@ -1,5 +1,15 @@
 # 維護決策
 
+## 2026-11-06：pytest 相容性下限與新鮮度裁決
+
+**決定**：`requirements-dev.txt` 的 `pytest>=9.1` 採常態 `freshness-hold`，保留已驗證的最低相容版本；最新版仍可由 resolver 安裝。不因新次版本發布而提高下限，也不把相容性宣告改為精確釘版。validator 的精確釘版維持原政策。
+
+**理由**：新鮮度初查僅 pytest 回報 REVIEW UPDATE（宣告 9.1、PyPI 9.2.0）。已閱讀 [pytest 9.2.0 變更紀錄](https://docs.pytest.org/en/stable/changelog.html#pytest-9-2-0-2026-10-27)，本 repo 沒有需要提高最低版本的新功能。此 hold 是相容性下限政策，不是延後安裝 9.2.0；報告仍顯示最新版與保留理由。
+
+**驗收**：在 Python 3.14.10 的隔離 `.venv` 分別安裝 pytest 9.1.0 與 9.2.0，各跑 `tools/dev_check.ps1` 與 `pip check`；另跑真實 `check_dependency_freshness.py --strict`。9.1.0 與 9.2.0 均通過（各 65 pytest、37 unittest），兩版 `pip check` 均無衝突，新鮮度 strict 為 0。原始 gate 因系統暫存目錄存取被拒失敗；改用 worktree 內暫存目錄後，既有「路徑逃出 repo」測試要求暫存目錄位於來源根目錄外。因此在 `.venv/gate-source` 建立逐檔位元組比對通過的來源副本，設定 `PYTEST_ADDOPTS=--basetemp=C:/GitHub/.wt-fresh/public-apis/.venv/pytest-<版本>-final`，由同一 `.venv` 的 Python 執行副本內完整 gate；全部寫入均留在本 worktree，不改測試。因 `.venv` 被 Ruff 忽略，另在原工作樹執行與 canonical gate 相同的 Ruff 命令及文件連結檢查；副本 gate 不作為 Ruff 的驗收證據。GitHub CLI 因設定檔存取遭拒，未確認未結 Dependabot PR，亦未宣稱遠端 workflow 已綠。
+
+**重新評估條件**：測試使用較新 pytest 才有的功能、9.1 出現不相容或安全問題，或最低相容版本政策改變；屆時才調整下限並補驗證。未修改 workflow；非 PR 事件的未結 Dependabot PR 仍是獨立阻擋條件。
+
 ## 2026-11-04：PR #8681..#8739 審查（commit 無新增，水位仍 2676ca4）
 
 **Upstream check 紅燈原因**：不是 workflow 壞掉，是上游有新東西——`--strict` 在 PR 軸找到 58 筆未審項（commit、issue 軸皆無新增，behind 0）。11-02 的 push 觸發那次已因同樣原因失敗，之後排程持續失敗到本輪審完為止。workflow 本身（`GH_TOKEN`、`continue-on-error`、報告發佈）運作正常。
