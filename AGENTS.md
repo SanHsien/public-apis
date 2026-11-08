@@ -15,6 +15,7 @@
 ## 硬性邊界
 
 - **不要翻譯或改寫 `README.md` 目錄。** 那是上游產品，不是本 fork 的維護索引。1000+ 筆條目若做成繁中鏡像，每週上游更新會無法審查。維護規則以本檔為準。
+  唯一例外：檔案最上方的「Maintained fork」出處說明（見 `FORK.md`），同步上游時保留它。
 - 不要改 `CONTRIBUTING.md` 的欄位規則（Auth / HTTPS / CORS / 描述長度），除非要回貢上游。
 - 不提交 API key、cookie、帳號資料，或把付費／行銷向 API 塞進目錄。
 - 不推送到 `upstream`。上游同步先跑 `python tools/check_upstream_updates.py`，逐筆審查後再 merge / cherry-pick；不盲目覆蓋 fork 文件與 Windows gate。

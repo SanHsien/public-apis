@@ -1,3 +1,7 @@
+> **Maintained fork.** This repository is a maintenance fork of [public-apis/public-apis](https://github.com/public-apis/public-apis), created by the public-apis authors (Copyright (c) 2022 public-apis) and licensed under the MIT License (see [LICENSE](LICENSE)). The API catalog below belongs to the upstream project. See [FORK.md](FORK.md) and [NOTICE.md](NOTICE.md).
+>
+> 繁中：本專案是 [public-apis/public-apis](https://github.com/public-apis/public-apis) 的維護 fork，原作者為 public-apis，採 MIT 授權；詳見 [FORK.md](FORK.md) 與 [NOTICE.md](NOTICE.md)。
+
 # APILayer Unified Suite is now Live! 🎉 🥳
 
 [APILayer unified suite](https://apilayer.com/products?utm_source=Github&utm_medium=Referral&utm_campaign=Public-apis-repo) allows you to integrate production-grade REST APIs using **One Account, One Dashboard, and One API key.** Whether you need to geocode an address, validate an email, fetch a flight, pull stock market data, or scrape a search result.

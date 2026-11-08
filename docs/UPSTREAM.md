@@ -32,7 +32,7 @@ python tools\check_upstream_updates.py --strict
 
 Baseline 代表「已審查」，不代表「全部已合併」。
 
-`README.md` 新條目直接同步，不必翻譯。若上游改了 `scripts/validate/` 或 GitHub Actions，才需要核對本 fork 的 Windows gate 是否仍能跑。
+`README.md` 新條目直接同步，不必翻譯。同步時保留檔案最上方的「Maintained fork」說明（見 `FORK.md`）。若上游改了 `scripts/validate/` 或 GitHub Actions，才需要核對本 fork 的 Windows gate 是否仍能跑。
 
 ## 2026-11-04：PR 審至 `#8739`
 

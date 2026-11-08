@@ -16,7 +16,7 @@
 
 | 項目 | 說明 |
 |---|---|
-| `README.md` | **不翻譯、不改寫。** 這份 1000+ API 目錄就是產品，保持上游英文為單一真相源 |
+| `README.md` | **不翻譯、不改寫。** 這份 1000+ API 目錄就是產品，保持上游英文為單一真相源。唯一的 fork 修改是檔案最上方的「Maintained fork」說明（英文加一行繁中，標明上游、原作者、授權並連到 `FORK.md` 與 `NOTICE.md`）；同步上游 `README.md` 時要保留，若該處衝突就重新貼回 |
 | `AGENTS.md` | 本 fork 的 AI 維護單一真相源 |
 | `NOTICE.md` / `FORK.md` | 來源、授權與同步說明 |
 | `tools/dev_check.ps1` | Windows 本機一鍵 gate |
