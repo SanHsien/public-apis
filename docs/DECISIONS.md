@@ -1,5 +1,34 @@
 # 維護決策
 
+## 2026-11-09：commit 2676ca4 → 8870667、PR #8740..#8884 與 issue #8792..#8885 審查
+
+**Upstream check 紅燈原因**：三軸同時有新東西——commit 195 筆（`git rev-list --count 2676ca4..upstream/master`）、PR 137 筆、issue 4 筆；不是 workflow 壞掉。
+
+**commit**（195 筆，`2676ca4..8870667`）：`git diff --name-only 2676ca4 upstream/master` 只有 `README.md`（+97/-0）；`scripts/`、`.github/` 無變動。
+- 採用（同步）：本 fork 的 README 只比 `2676ca4` 多最上方「Maintained fork」4 行（`git diff 2676ca4 HEAD -- README.md` 只有該段），所以不整檔覆蓋，改套上游增量：`git diff 2676ca4 upstream/master -- README.md | git apply`；套用 +97/-0，與 `upstream/master` 的差異只剩 fork 說明那 4 行。理由同 2026-10-28：`FORK.md` 規定 README 以上游為單一真相源，同步時保留 fork 說明。
+- 這 195 筆是上游的策展結果（新增條目與其合併 commit），本 fork 不逐筆審條目內容（判準五）。
+  觸發條件：上游改動 `scripts/validate/` 或 workflow。
+
+**PR**（`--state all`，#8740..#8884 共 137 筆：131 open／6 closed 未合併，0 merged）。每筆取 2026-11-09 當下的 head、讀完整 diff（`gh pr diff`），依判準八掃隱藏內容（樣式同 2026-11-02 條目）：137 份 diff 中 1 份命中——#8748，詳見下表，命中內容是既有條目的欄位對齊空白與 utm 連結，不是隱藏內容。
+
+| 分類 | 筆數 | 判定 |
+| --- | --- | --- |
+| 只在 `README.md` 新增 1 行條目的目錄投稿，OPEN | 116 | 不收（判準五）：#8740、#8741、#8742、#8743、#8744、#8745、#8746、#8747、#8749、#8750、#8751、#8752、#8755、#8756、#8757、#8758、#8759、#8760、#8761、#8762、#8763、#8764、#8765、#8766、#8767、#8768、#8769、#8770、#8771、#8772、#8773、#8774、#8775、#8776、#8777、#8778、#8779、#8780、#8781、#8782、#8783、#8784、#8785、#8786、#8787、#8791、#8794、#8795、#8796、#8797、#8799、#8800、#8801、#8802、#8803、#8804、#8805、#8806、#8807、#8809、#8810、#8811、#8812、#8813、#8814、#8815、#8817、#8819、#8820、#8821、#8822、#8823、#8825、#8826、#8828、#8829、#8830、#8831、#8832、#8833、#8834、#8836、#8838、#8839、#8841、#8843、#8844、#8845、#8851、#8852、#8853、#8854、#8855、#8856、#8857、#8858、#8860、#8861、#8862、#8863、#8865、#8867、#8868、#8869、#8870、#8872、#8873、#8876、#8877、#8878、#8879、#8880、#8881、#8882、#8883、#8884。上游尚未接受，替上游決定收錄不是 fork 的工作；接受後經 commit 軸抵達。觸發條件：上游合併。 |
+| 其他 README 內容異動，OPEN（#8753／#8754／#8808／#8818／#8847／#8864／#8874 各 +1/-1 描述或連結修改；#8798 +5、#8866 +2 新增；#8835／#8848／#8849／#8850 移除條目 -1／-2／-5／-9） | 13 | 不收：改的是目錄內容，上游職責；自行改會在下次同步成為衝突。觸發條件：上游合併，隨 commit 軸抵達。 |
+| #8748 `Add ChainAPI …`（README +2800/-2799，OPEN） | 1 | 不收：整份 README 的行尾轉成 CRLF（diff 2800 行含 `\r\n`），實質只多 1 個條目；掃描命中的是既有條目的欄位對齊空白與 utm 連結。照收會讓整檔 diff 失去可讀性並與 fork 說明段衝突。 |
+| #8789 `Add AlphaGrowth MCP`（README +1，CLOSED）、#8840 `Fix duplicate entry for VATComply.com`（README +1/-2，CLOSED） | 2 | 不收：上游關閉未合併，收進來等於放回不合格條目。 |
+| #8793、#8824、#8846、#8875 `Fix: Public APIs Situation [ READ THIS ISSUE PLEASE ]`（`format.py` +1/-0，CLOSED） | 4 | 拒絕：四份 diff 的 md5 相同（`821a36729896`），只在 `error_message()` 加 `"""Auto-generated docstring."""`，不改行為；與 2026-10-25／11-02 已拒絕的同一類。觸發條件：出現改動 `scripts/validate/` 邏輯的版本。 |
+| #8859 `Check the minimum entries of the last category in format.py`（`format.py` +6、`test_validate_format.py` +30，OPEN，head `d73fd46958474287e54cd20a27e9d02b4cfa0ef0`） | 1 | **採用**（逐字移植上游 #8859 的 diff，含其測試）：`check_file_format()` 只在遇到下一個 `###` 標題時才檢查前一類別的條目數，最後一個類別永遠不被檢查。先加 `test_check_file_format_with_last_category_without_min_entries`（最後類別只有 1 筆），實跑 `cd scripts && python -m unittest discover tests/` 紅燈（`AssertionError: 0 != 1`），再在迴圈後補一次同樣的檢查（`if category and …`，空檔或無類別標題的檔案略過），轉綠（38 tests OK，原 37）。對真實 README 跑 `format.py` 輸出行數修正前後都是 58，現行最後類別 Weather 條目充足，無新增誤報。 |
+
+**issue**（`--state all`，#8792..#8885 共 4 筆）：
+- #8792 `A.n.s.y`（CLOSED，內文空）、#8837 `battle hub`（OPEN，內文空）：無可處理內容。不收。
+- #8827 `FASTRACK_`（OPEN）：內文是 `vidyehub.online/*.mp4` 影片連結經 `vk.ru/away.php` 轉址，垃圾內容。不收，連結不開不引用。
+- #8885：回報 Eden AI 兩個 PR（#5747、#8884）重複，詢問上游該留哪個。屬上游投稿佇列的決定，兩個 PR 都不收（見上表 #8884）。
+
+水位：commit `2676ca49` → `88706670ac0ffaad7bf3c6307747e2515f638bed`、PR #8739 → #8884、issue #8666 → #8885。
+
+**驗證**：`tools/dev_check.ps1` 全 gate 與水位推進後的真實 `check_upstream_updates.py --strict`，結果見提交。
+
 ## 2026-11-06：pytest 相容性下限與新鮮度裁決
 
 **決定**：`requirements-dev.txt` 的 `pytest>=9.1` 採常態 `freshness-hold`，保留已驗證的最低相容版本；最新版仍可由 resolver 安裝。不因新次版本發布而提高下限，也不把相容性宣告改為精確釘版。validator 的精確釘版維持原政策。

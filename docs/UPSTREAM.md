@@ -34,6 +34,14 @@ Baseline 代表「已審查」，不代表「全部已合併」。
 
 `README.md` 新條目直接同步，不必翻譯。同步時保留檔案最上方的「Maintained fork」說明（見 `FORK.md`）。若上游改了 `scripts/validate/` 或 GitHub Actions，才需要核對本 fork 的 Windows gate 是否仍能跑。
 
+## 2026-11-09：審至 `8870667`
+
+- commit：`2676ca4..8870667` 共 195 筆，只動 `README.md`（+97/-0，策展結果）；套用上游增量並保留「Maintained fork」說明，與 `upstream/master` 只差該 4 行。
+- PR：`#8740..#8884` 共 137 筆；116 筆單行目錄投稿、13 筆其他 README 異動、#8748（整檔 CRLF）、2 筆關閉的 README 修改、4 筆關閉的純 docstring 均不收；每筆都取目前 head 並掃過隱藏內容。採用 #8859（`format.py` 最後一個類別未檢查最少條目數），逐字移植上游 diff（含其測試）。
+- issue：`#8792..#8885` 共 4 筆（2 筆空內文、1 筆垃圾連結、1 筆詢問上游兩個重複 PR）不收。
+
+水位已寫入 `tools/upstream_baseline.json`：commit `88706670ac0ffaad7bf3c6307747e2515f638bed`、PR #8884、issue #8885。
+
 ## 2026-11-04：PR 審至 `#8739`
 
 - Upstream check 紅燈原因：PR 軸 58 筆未審項（`#8681..#8739`），不是 workflow 壞掉；commit 與 issue 軸無新增。
