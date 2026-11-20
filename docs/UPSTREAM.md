@@ -158,7 +158,7 @@ API 目錄條目。那份目錄的內容屬上游，合併後會隨 commit 進�
 
 | 分支 | 狀態 | 結論 |
 | --- | --- | --- |
-| `dependabot/pip/scripts/certifi-2022.12.7`（ahead 1、behind 631） | 2022 年的安全更新分支 | 不引用。它動的是上游 `scripts/requirements.txt` 的 2021 年 pin——本 fork 明文不維護那份（見 `.github/dependabot.yml` 的註解），本 fork 自己的 `requirements-dev.txt` 用的是現行版。 |
+| `dependabot/pip/scripts/certifi-2022.12.7`（ahead 1、behind 631） | 2022 年的安全更新分支 | 不引用。它動的是上游 `scripts/requirements.txt` 的 2021 年 pin。（2026-08-22 當時本 fork 不維護那份；**2026-10-10 起改由本 fork 維護**，Dependabot 與 Dependency freshness 都涵蓋它，見 `.github/dependabot.yml` 的註解與 `docs/DECISIONS.md` 2026-11-21 條。certifi 已在本 fork 升到現行版，這個分支仍不需要。） |
 | `copilot/search-businesses-using-apis`（ahead 1、behind 621） | 比對結果沒有變更檔案 | 不引用，沒有內容。 |
 
 ## 2026-08-23：`--state all` 補查，並修好一支「對未改動的 README 報 557 個錯」的檢查器

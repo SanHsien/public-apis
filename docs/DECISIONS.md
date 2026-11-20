@@ -1,5 +1,13 @@
 # 維護決策
 
+## 2026-11-21：`scripts/requirements.txt` 改由本 fork 維護（補記，推翻 2026-08-22 的 R-05）
+
+**決定**：2026-10-10（`22e6ec81`，PR #4）起，`scripts/requirements.txt` 由本 fork 維護：requests、urllib3、certifi 等釘現行版，Dependabot 與 Dependency freshness 都涵蓋它。下方 2026-08-22 兩條「不維護、不啟用 Dependabot」是當時的決定，已被這條取代。
+
+**理由**：`requirements-dev.txt` 用 `-r` 引用這份檔案，CI 實際跑 validator 的就是這組依賴；兩份 manifest 必須一起通過 resolver 與 CI（`.github/dependabot.yml` 註解）。`22e6ec81` 的標題是 coordinate validator upgrades and restore main CI。
+
+**代價**：新釘版需要 Python ≥3.10。三支上游 3.8 workflow 在 3.8 已裝不起來，只靠 repo guard 在本 fork skip；回貢或移除 guard 時必須一起處理（見 `AGENTS.md`）。
+
 ## 2026-11-09：commit 2676ca4 → 8870667、PR #8740..#8884 與 issue #8792..#8885 審查
 
 **Upstream check 紅燈原因**：三軸同時有新東西——commit 195 筆（`git rev-list --count 2676ca4..upstream/master`）、PR 137 筆、issue 4 筆；不是 workflow 壞掉。

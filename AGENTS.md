@@ -23,7 +23,8 @@
 
 ## 技術與資料流
 
-- Python 3.10+（本機與 Windows CI 以 3.14 為準；Ubuntu CI 跑 3.12 與 3.14）；上游 GitHub Actions 仍跑 3.8，不要去改那些 workflow 的版本，除非回貢。
+- Python 3.10+（本機與 Windows CI 以 3.14 為準；Ubuntu CI 跑 3.12 與 3.14）。`scripts/requirements.txt` 自 2026-10-10 起由本 fork 維護（requests 2.34／urllib3 2.8 需要 Python ≥3.10）。
+- 三支上游 workflow（`test_of_push_and_pull.yml`、`test_of_validate_package.yml`、`validate_links.yml`）仍寫 Python 3.8 並安裝 `scripts/requirements.txt`，**在 3.8 已裝不起來**；它們靠 repo guard 只在上游 repo 執行，在本 fork 一律 skip。不要為了本 fork 去改那些 workflow；若要回貢、或拿掉 guard，必須同時處理 Python 版本與這份依賴，否則會直接壞掉。
 - `README.md`：API 目錄。
 - `scripts/validate/`：格式與連結檢查（以上游為準）。
 - `tools/`：fork 維護工具（上游檢查、相對連結檢查、Windows gate）。
