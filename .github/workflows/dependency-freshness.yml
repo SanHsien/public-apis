@@ -30,9 +30,12 @@ permissions:
   contents: read
   pull-requests: read
 
+# One group per event and ref: a pull request run and the monthly schedule must
+# never cancel each other. Only a superseded run of the same PR is cancelled;
+# a cancelled schedule would hide that month's maintenance signal.
 concurrency:
-  group: dependency-freshness
-  cancel-in-progress: true
+  group: dependency-freshness-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   check:

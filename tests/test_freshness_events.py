@@ -94,3 +94,18 @@ jq() {{
     report = (tmp_path / "dependency-freshness-report.md").read_text(encoding="utf-8")
     assert ("#4 upgrade" in report) == (open_count > 0)
     assert summary.read_text(encoding="utf-8") == report
+
+
+def test_freshness_runs_from_different_events_or_refs_never_cancel_each_other() -> None:
+    config = yaml.load(
+        (ROOT / ".github/workflows/dependency-freshness.yml").read_text(encoding="utf-8"),
+        Loader=yaml.BaseLoader,
+    )
+    concurrency = config["concurrency"]
+    # A PR run and the monthly schedule must land in different groups.
+    assert "${{ github.event_name }}" in concurrency["group"]
+    assert "${{ github.ref }}" in concurrency["group"]
+    # Only a superseded PR run may be cancelled; a scheduled run never is.
+    assert concurrency["cancel-in-progress"] == (
+        "${{ github.event_name == 'pull_request' }}"
+    )
