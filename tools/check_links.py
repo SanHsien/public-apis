@@ -3,7 +3,9 @@
 
 本 fork 的公開入口互相連來連去：FORK、NOTICE、AGENTS 與 docs。
 文件被重新定位或改名時，這些連結會靜靜斷掉。只驗相對連結；外部網址交給人看。
-不掃根目錄 `README.md`：那是 1000+ API 目錄。`scripts/README.md` 仍會掃。
+根目錄 `README.md` 是 1000+ API 目錄，只掃頂端 fork 自己寫的說明：
+`<!-- fork-notice:start -->` 到 `<!-- fork-notice:end -->` 之間。標記不見時報錯，
+避免同步上游時把它弄丟、檢查卻靜靜變成空轉。`scripts/README.md` 整份都掃。
 
     python tools/check_links.py
 """
@@ -23,13 +25,50 @@ FENCED_CODE = re.compile(
     r"^ {0,3}(`{3,}|~{3,})[^\n]*\n.*?(?:^ {0,3}\1[`~]*[ \t]*$|\Z)",
     re.DOTALL | re.MULTILINE,
 )
-INLINE_CODE = re.compile(r"(`+)(?:(?!\1).)+?\1")
+BACKTICK_RUN = re.compile(r"`+")
+# Kept by re.split (capturing group) so paragraphs stay apart after stripping.
+PARAGRAPH_BREAK = re.compile(r"(\n[ \t]*\n)")
 
+# The root README is the upstream catalog; only the fork-authored notice at its
+# top is ours to check.
+CATALOG_README = "README.md"
+FORK_NOTICE_START = "<!-- fork-notice:start -->"
+FORK_NOTICE_END = "<!-- fork-notice:end -->"
 
 SKIP_RELATIVE = {
-    "README.md",
     "upstream-review-report.md",
 }
+
+
+def strip_code_spans(text: str) -> str:
+    """Remove CommonMark code spans.
+
+    A backtick run opens a span that closes only on the next run of exactly
+    the same length in the same paragraph. A run with no such closer is
+    literal text, so the prose after it (and any link there) is still checked.
+    """
+    return "".join(_strip_paragraph(part) for part in PARAGRAPH_BREAK.split(text))
+
+
+def _strip_paragraph(text: str) -> str:
+    runs = list(BACKTICK_RUN.finditer(text))
+    kept: list[str] = []
+    position = 0
+    index = 0
+    while index < len(runs):
+        width = len(runs[index].group())
+        closer = next(
+            (j for j in range(index + 1, len(runs)) if len(runs[j].group()) == width),
+            None,
+        )
+        if closer is None:
+            index += 1
+            continue
+        kept.append(text[position : runs[index].start()])
+        position = runs[closer].end()
+        index = closer + 1
+    kept.append(text[position:])
+    return "".join(kept)
 
 
 def iter_documents() -> list[Path]:
@@ -57,10 +96,26 @@ def link_destination(raw: str) -> str:
     return raw.split(None, 1)[0] if raw else ""
 
 
+def _relative(path: Path) -> str | None:
+    try:
+        return path.resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        return None
+
+
 def check_document(path: Path) -> list[str]:
     problems: list[str] = []
-    text = FENCED_CODE.sub("", path.read_text(encoding="utf-8"))
-    text = INLINE_CODE.sub("", text)
+    text = path.read_text(encoding="utf-8")
+    if _relative(path) == CATALOG_README:
+        start = text.find(FORK_NOTICE_START)
+        end = text.find(FORK_NOTICE_END, start + 1)
+        if start < 0 or end < 0:
+            return [
+                f"找不到 {FORK_NOTICE_START} … {FORK_NOTICE_END} 標記；"
+                "fork 說明的連結因此沒有被檢查"
+            ]
+        text = text[start + len(FORK_NOTICE_START) : end]
+    text = strip_code_spans(FENCED_CODE.sub("", text))
     for match in LINK_PATTERN.finditer(text):
         target = link_destination(match.group(1))
         if not target or target.startswith(SKIP_PREFIXES):

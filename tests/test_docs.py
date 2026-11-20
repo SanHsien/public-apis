@@ -49,9 +49,15 @@ def test_gitignore_covers_generated_reports() -> None:
     assert ".venv" in gitignore
 
 
-def test_check_links_skips_the_api_catalog() -> None:
+def test_check_links_scans_only_the_fork_notice_of_the_api_catalog() -> None:
     rels = {path.relative_to(ROOT).as_posix() for path in check_links.iter_documents()}
-    assert "README.md" not in rels
+    # The catalog is scanned, but only between the fork-notice markers.
+    assert "README.md" in rels
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    start = readme.index(check_links.FORK_NOTICE_START)
+    notice = readme[start : readme.index(check_links.FORK_NOTICE_END, start)]
+    for target in ("(LICENSE)", "(FORK.md)", "(NOTICE.md)"):
+        assert target in notice
     assert "scripts/README.md" in rels
     assert "FORK.md" in rels
     assert "docs/UPSTREAM.md" in rels
