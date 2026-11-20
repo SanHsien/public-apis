@@ -16,6 +16,7 @@ SanHsien 維護的 `public-apis/public-apis` fork：目錄本體跟隨上游，�
 | --- | --- | --- | --- | --- |
 | 同步上游新提交與目錄條目 | `Upstream check` workflow 轉為 failure | 執行 `python tools/check_upstream_updates.py`，完成審查並更新 `tools/upstream_baseline.json` 與 README，`tools/dev_check.ps1` 綠燈 | Codex | `tools/check_upstream_updates.py`；`tools/upstream_baseline.json` |
 | 評估 README.md 的 publicapis.lol 導覽段是否轉為 overlay | 維護者決定要不要保留上游 PR #8475 加入的 publicapis.lol utm 導覽段 | `docs/DECISIONS.md` 記下保留或移除及理由；若移除，在 `FORK.md` 列為 overlay；`tools/dev_check.ps1` 綠燈 | 維護者 | `README.md:98-103`；`docs/UPSTREAM.md:39`；深掃報告（2026-10-28） |
+| 同步 canonical `check_upstream_updates.py` 與其測試 | `repo-fleet-ops` 的 canonical 檔修好 F-5（`repo` 選項注入）並發布 | 本 repo `tools/check_upstream_updates.py` 與 canonical 逐位元組相同；R-07 回歸測試回到本 repo 或有一致性檢查；`tools/dev_check.ps1` 綠燈 | 維護者 | `REVIEW.md` F-5、F-6 |
 | 更新 Python 開發依賴套件 | Dependabot 提出依賴更新 PR 或 `Dependency freshness` 轉紅 | `pwsh -NoProfile -File tools\dev_check.ps1` 綠（含 pytest 與 unittest）；對應 Dependabot PR 合併或關閉 | Claude Haiku | `requirements-dev.txt`；`.github/workflows/dependency-freshness.yml`；2026-11-06 pytest 下限裁決見 `docs/DECISIONS.md` |
 
 ## 刻意不做
