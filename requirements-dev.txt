@@ -3,7 +3,7 @@
 pytest>=9.1  # freshness-hold: 保留已驗證的最低相容版本 9.1；允許安裝最新版，不隨次版本發布抬高下限。
 ruff>=0.17
 # YAML workflow regression tests preserve GitHub Actions' literal `on` key.
-PyYAML>=6.0.3
+PyYAML>=6.0.3  # freshness-hold: 保留已驗證的最低相容版本 6.0.3；允許安裝最新版，不隨修補版發布抬高下限。
 # tools/check_links.py reads Markdown with a real CommonMark parser.
 markdown-it-py==4.2.0  # freshness-hold: exact pin so tools/check_links.py parses Markdown the same way locally and in CI; upgrades arrive as Dependabot PRs that run the link gate
 # 在本 fork 的 CI 實際驗證 validator 的同一組依賴。

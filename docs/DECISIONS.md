@@ -395,3 +395,7 @@ bug 就送回去」涵蓋的情況——要回貢需要維護者在當次對話�
 **Issue（#7114–#7622）**：唯一有內容的是 #7301／#7435／#7583（死連結與棄用 API 回報），修正屬策展，依 `FORK.md` 為上游職責；#7440 是 MCP server 徵集，#7577／#7260／#7601 為無關內容。觸發條件：上游移除條目時隨 commit 軸抵達。
 
 **驗證**：`dev_check.ps1` 全綠後才推進；`format.py` 在同步後的 findings 不計入本線 gate（見 2026-08-30 條目）。
+
+## 2026-11-21 dependency freshness 失敗
+
+CI push 執行 needs_attention=true：PyYAML 6.0.4、certifi 2026.11.20 同日發布而標為 REVIEW UPDATE（markdown-it-py 本來就是 HELD）。本機檢查器結束碼恆為 0，要看 needs_attention 輸出才準。處置：certifi 升到 2026.11.20（dev_check 全綠）；PyYAML 依 pytest 前例保留最低相容版 6.0.3 並加 freshness-hold。
