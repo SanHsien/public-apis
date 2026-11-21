@@ -23,6 +23,7 @@
 | F-5 | hardening | baseline 的 `repo` 未擋 `-` 開頭就交給 `git ls-remote/fetch`（選項注入） | **不在本 repo 修**：canonical 檔，於 `repo-fleet-ops` `tools/canonical/check_upstream_updates.py` 修正後再同步過來 |
 | F-6 | hardening | R-07 的回歸測試（`test_run_git_wraps_missing_executable` 等）在 `22b91676` 從本 repo 刪除 | **由 canonical repo 擁有**：對應測試在 `repo-fleet-ops` `tools/canonical/check_upstream_updates_test.py`；本 repo 待維護者之後同步 canonical 測試 |
 | F-7 | hardening | `scripts/requirements.txt` 已改由 fork 維護，但 `AGENTS.md`、`docs/UPSTREAM.md`、R-05 仍寫舊的上游 3.8 契約 | **已修** `6a7a4f45`（2026-11-21）：三處改成現況，`docs/DECISIONS.md` 補 2026-11-21 條說明何時、為何推翻 R-05 |
+| F-8 | P4 | `check_links.py` 以 regex 剝除程式碼，仍有假綠：孤立反引號跨 blockquote 分段、ATX 標題、HTML 區塊／註解、以標題開頭的 list item 或 GFM 表格儲存格配對；`` \` `` 被當 code span 分隔；縮排 ```` ``` ````、list item 內的 fence、`>` 後接 tab 的 fence 被誤判。 | 已修 `2bd91a54`（2026-11-21）：改用 markdown-it-py 4.2.0（CommonMark＋GFM 表格，精確釘版於 `requirements-dev.txt`，`dev_check` 先安裝）解析，只檢查 link／image token 與 HTML token 內的 `<img src>`；程式碼由 parser 排除。fence 的原始範圍沒結束在收尾行就回報「沒有收尾」。`test_code_detection_does_not_hide_a_real_link` 11 例中 10 例與 `test_unclosed_fence_fails_instead_of_hiding_the_rest`（原本未收尾 fence 靜默吃到檔尾）在原版失敗（另 1 例留作回歸防線）；`test_code_in_blockquotes_and_spans_is_still_not_a_link` 鎖住不誤報。HTML `<img src>` 維持不檢查（原範圍）。真實文件比對：舊版檢查過的目標一個不少，0 斷連結。 |
 
 ## 2026-08-22 findings（現況）
 
