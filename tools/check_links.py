@@ -14,21 +14,16 @@ from __future__ import annotations
 
 import re
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 from urllib.parse import unquote
 
-ROOT = Path(__file__).resolve().parent.parent
-LINK_PATTERN = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
-SKIP_PREFIXES = ("http://", "https://", "mailto:", "tel:", "#")
-# Code is not prose: a link written inside a fence or backticks is an example.
-FENCED_CODE = re.compile(
-    r"^ {0,3}(`{3,}|~{3,})[^\n]*\n.*?(?:^ {0,3}\1[`~]*[ \t]*$|\Z)",
-    re.DOTALL | re.MULTILINE,
-)
-BACKTICK_RUN = re.compile(r"`+")
-# Kept by re.split (capturing group) so paragraphs stay apart after stripping.
-PARAGRAPH_BREAK = re.compile(r"(\n[ \t]*\n)")
+from markdown_it import MarkdownIt
+from markdown_it.token import Token
 
+ROOT = Path(__file__).resolve().parent.parent
+HTML_SRC_PATTERN = re.compile(r"""(?is)<img[^>]+src=["']([^"']+)["']""")
+SKIP_PREFIXES = ("http://", "https://", "mailto:", "tel:", "#")
 # The root README is the upstream catalog; only the fork-authored notice at its
 # top is ours to check.
 CATALOG_README = "README.md"
@@ -40,35 +35,63 @@ SKIP_RELATIVE = {
 }
 
 
-def strip_code_spans(text: str) -> str:
-    """Remove CommonMark code spans.
+# Read Markdown with a real CommonMark + GFM table parser, the way GitHub
+# renders it. Hand-written regexes for code spans and fences kept hiding real
+# links (HTML blocks, tables, list items opening with a heading, tabs after ">"),
+# so the parser decides what is code; links quoted in code are never tokens.
+MARKDOWN = MarkdownIt("commonmark", {"html": True}).enable("table")
+FENCE_CLOSE = re.compile(r"[ \t>]*(?P<fence>`{3,}|~{3,})[ \t]*$")
 
-    A backtick run opens a span that closes only on the next run of exactly
-    the same length in the same paragraph. A run with no such closer is
-    literal text, so the prose after it (and any link there) is still checked.
+
+def _walk(tokens: list[Token]) -> Iterator[Token]:
+    for token in tokens:
+        yield token
+        if token.children:
+            yield from _walk(token.children)
+
+
+def _fence_is_closed(token: Token, lines: list[str]) -> bool:
+    """A closed fence's source range ends on its closing line."""
+    start, end = token.map or (0, 0)
+    if end - start < 2 or end > len(lines):
+        return False
+    closer = FENCE_CLOSE.match(lines[end - 1])
+    return bool(
+        closer
+        and closer.group("fence")[0] == token.markup[0]
+        and len(closer.group("fence")) >= len(token.markup)
+    )
+
+
+def extract_targets(text: str) -> tuple[list[tuple[str, bool]], int | None]:
+    """Return the link targets of a document and the line of an unclosed fence.
+
+    Each target is (destination, is_markdown): Markdown links and images carry a
+    parsed destination (titles already removed), an HTML <img src> is the raw
+    attribute. CommonMark runs an unclosed fence to the end of its container and
+    hides every link after it; that is almost always a typo, so the caller
+    reports it instead of passing silently.
     """
-    return "".join(_strip_paragraph(part) for part in PARAGRAPH_BREAK.split(text))
-
-
-def _strip_paragraph(text: str) -> str:
-    runs = list(BACKTICK_RUN.finditer(text))
-    kept: list[str] = []
-    position = 0
-    index = 0
-    while index < len(runs):
-        width = len(runs[index].group())
-        closer = next(
-            (j for j in range(index + 1, len(runs)) if len(runs[j].group()) == width),
-            None,
-        )
-        if closer is None:
-            index += 1
-            continue
-        kept.append(text[position : runs[index].start()])
-        position = runs[closer].end()
-        index = closer + 1
-    kept.append(text[position:])
-    return "".join(kept)
+    lines = text.splitlines()
+    targets: list[tuple[str, bool]] = []
+    unclosed: int | None = None
+    for token in _walk(MARKDOWN.parse(text)):
+        if token.type == "link_open":
+            targets.append((str(token.attrGet("href") or ""), True))
+        elif token.type == "image":
+            targets.append((str(token.attrGet("src") or ""), True))
+        elif token.type in ("html_block", "html_inline"):
+            targets.extend(
+                (match.group(1), False)
+                for match in HTML_SRC_PATTERN.finditer(token.content)
+            )
+        elif (
+            token.type == "fence"
+            and unclosed is None
+            and not _fence_is_closed(token, lines)
+        ):
+            unclosed = (token.map or (0, 0))[0] + 1
+    return targets, unclosed
 
 
 def iter_documents() -> list[Path]:
@@ -114,10 +137,21 @@ def check_document(path: Path) -> list[str]:
                 f"找不到 {FORK_NOTICE_START} … {FORK_NOTICE_END} 標記；"
                 "fork 說明的連結因此沒有被檢查"
             ]
+        first_line = text.count("\n", 0, start)
         text = text[start + len(FORK_NOTICE_START) : end]
-    text = strip_code_spans(FENCED_CODE.sub("", text))
-    for match in LINK_PATTERN.finditer(text):
-        target = link_destination(match.group(1))
+    else:
+        first_line = 0
+    # Code is not prose: the parser never turns a link quoted in code into a token.
+    found, unclosed = extract_targets(text)
+    if unclosed is not None:
+        problems.append(
+            f"第 {first_line + unclosed} 行的 code fence 沒有收尾，之後的連結都不會被檢查"
+        )
+    # This checker has never checked HTML <img src>; keep its scope.
+    for raw, is_markdown in found:
+        if not is_markdown:
+            continue
+        target = link_destination(raw)
         if not target or target.startswith(SKIP_PREFIXES):
             continue
         file_part = unquote(target.split("#", 1)[0])

@@ -76,6 +76,71 @@ def test_unclosed_double_backtick_does_not_hide_a_broken_link(
     assert len(problems) == 1 and "gone.md" in problems[0]
 
 
+# Each text renders [real](gone.md) as a real link in CommonMark (checked with
+# markdown-it-py 4.2.0); a stray backtick or fence-like line must not hide it.
+HIDDEN_LINK_CASES = {
+    "code span crosses a blockquote paragraph break": (
+        "> A stray ` backtick.\n>\n> [real](gone.md)\n>\n> Another ` backtick.\n"
+    ),
+    "escaped backtick opens a code span": (
+        "An escaped \\` backtick, [real](gone.md), then `code`.\n"
+    ),
+    "code span crosses an ATX heading": "# A ` heading\n[real](gone.md) and ` here.\n",
+    "indented backticks open a fence": "Para.\n\n    ```\n[real](gone.md)\n    ```\n",
+    "fence outlives its list item": (
+        "- Step:\n\n  ```sh\n  run\n\n[real](gone.md)\n\n  ```\n"
+    ),
+    "html block interrupts a paragraph": (
+        "A stray ` tick.\n<pre>x</pre>\n[real](gone.md) and ` another.\n"
+    ),
+    "html comment interrupts a paragraph": (
+        "A stray ` tick.\n<!-- note -->\n[real](gone.md) and ` another.\n"
+    ),
+    "list item opens with an ATX heading": (
+        "- # A ` heading\n  [real](gone.md) and ` here.\n"
+    ),
+    "table cells split code spans": (
+        "| a ` b | [real](gone.md) | c ` d |\n|---|---|---|\n"
+    ),
+    "five spaces after a list marker is indented code": (
+        "-     ```\n  [real](gone.md)\n-     code ` x\n"
+    ),
+    "tab after a blockquote marker counts from line start": (
+        ">\t```\n> ` x\n[real](gone.md)\n>\t` x\n"
+    ),
+}
+
+
+@pytest.mark.parametrize("text", HIDDEN_LINK_CASES.values(), ids=HIDDEN_LINK_CASES.keys())
+def test_code_detection_does_not_hide_a_real_link(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, text: str
+) -> None:
+    problems = _check(tmp_path, monkeypatch, text)
+
+    assert any("gone.md" in problem for problem in problems)
+
+
+def test_unclosed_fence_fails_instead_of_hiding_the_rest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """CommonMark runs an unclosed fence to the end of the file, hiding every
+    later link; the gate reports the fence rather than passing silently."""
+    problems = _check(tmp_path, monkeypatch, "Intro.\n\n```\n[real](gone.md)\n")
+
+    assert any("第 3 行" in problem and "fence" in problem for problem in problems)
+
+
+def test_code_in_blockquotes_and_spans_is_still_not_a_link(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    text = (
+        "> ```\n> [x](fenced.md)\n>\n> ```\n\n"
+        "Use `[y](span.md)` and ``a ` [z](z.md)``.\n"
+    )
+
+    assert _check(tmp_path, monkeypatch, text) == []
+
+
 def _readme(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, text: str) -> list[str]:
     (tmp_path / "FORK.md").write_text("x", encoding="utf-8")
     readme = tmp_path / "README.md"
