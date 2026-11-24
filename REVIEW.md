@@ -1,6 +1,6 @@
 # Repository review（Windows-first）
 
-- Review date: 2026-11-20（增量審查 `5127e078..605a1a4d`）；修復狀態更新 2026-11-21
+- Review date: 2026-11-20（增量審查 `5127e078..605a1a4d`）；修復狀態更新 2026-11-24
 - Earlier review: 2026-08-22（R-01～R-10，狀態併入下表）
 - Primary environment: Windows 11、PowerShell、Python 3.14.10（本機 `.venv`）、CI Ubuntu 3.12／3.14、Windows 3.14
 - Status: 維護骨架可用；API 目錄與 `scripts/validate/` 未改寫；fork 可修的項目都已修，canonical 工具的項目交回 `repo-fleet-ops`
@@ -9,8 +9,7 @@
 
 這個 fork 適合作為 Windows 本機查詢、並追蹤上游目錄更新的維護線。產品是 `README.md` 裡 1000+ 筆免費 public API。
 
-2026-11-20 增量審查的 F-1～F-7：本 repo 能修的（F-1～F-4、F-7）都修了；F-5、F-6 屬 canonical
-`tools/check_upstream_updates.py`（與 `repo-fleet-ops` `tools/canonical/` 逐位元組相同），在那邊修，本 repo 不改。
+2026-11-20 增量審查的 F-1～F-7：F-1～F-4、F-7 已修；F-6 的 canonical 等價回歸測試已於 2026-11-24 帶回本 repo。F-5 仍由 canonical repo 修正後再同步。
 
 ## 2026-11-20 findings
 
@@ -21,7 +20,7 @@
 | F-3 | P4 | `check_links.py` 行內程式碼剝除會讓反引號與不等長的 run 配對，吃掉真的斷連結 | **已修** `f75284eb`（2026-11-21）：照 CommonMark 等長 run 配對、限同段落。註：審查原例（孤立 `` ` `` 後接 `` `cmd` ``）在 CommonMark 下確實是 code span（markdown-it-py 4.2.0 驗證），維持略過並以測試釘住；真正的漏報是孤立 run 配到較長 run 或未閉合的 ``` `` ```，兩者都有測試 |
 | F-4 | hardening | 根目錄 `README.md` 整檔跳過，頂端 fork 說明的 `LICENSE`／`FORK.md`／`NOTICE.md` 連結無檢查 | **已修** `f75284eb`（2026-11-21）：說明夾在 `<!-- fork-notice:start/end -->`，只掃這段；標記不見就報錯 |
 | F-5 | hardening | baseline 的 `repo` 未擋 `-` 開頭就交給 `git ls-remote/fetch`（選項注入） | **不在本 repo 修**：canonical 檔，於 `repo-fleet-ops` `tools/canonical/check_upstream_updates.py` 修正後再同步過來 |
-| F-6 | hardening | R-07 的回歸測試（`test_run_git_wraps_missing_executable` 等）在 `22b91676` 從本 repo 刪除 | **由 canonical repo 擁有**：對應測試在 `repo-fleet-ops` `tools/canonical/check_upstream_updates_test.py`；本 repo 待維護者之後同步 canonical 測試 |
+| F-6 | hardening | R-07 的回歸測試（`test_run_git_wraps_missing_executable` 等）在 `22b91676` 從本 repo 刪除 | **已修** `138d0c9e56dd24273cbae0ad1c11b1c0fe4ad7e0`（2026-11-24）：`tests/test_upstream_check.py` 帶回 canonical 等價測試，鎖住 Git 缺失／逾時與畸形 log 的 `UpstreamCheckError`；來源為 `repo-fleet-ops` `c1190760483a7da96d135809cd6fe4efe693baf4`。一次變異將 `except OSError` 改為 `except PermissionError`，缺失 Git 測試失敗（exit 1）；原檔逐位元組還原。`tools/dev_check.ps1` exit 0（pytest 90 passed、上游 unittest 38 OK） |
 | F-7 | hardening | `scripts/requirements.txt` 已改由 fork 維護，但 `AGENTS.md`、`docs/UPSTREAM.md`、R-05 仍寫舊的上游 3.8 契約 | **已修** `6a7a4f45`（2026-11-21）：三處改成現況，`docs/DECISIONS.md` 補 2026-11-21 條說明何時、為何推翻 R-05 |
 | F-8 | P4 | `check_links.py` 以 regex 剝除程式碼，仍有假綠：孤立反引號跨 blockquote 分段、ATX 標題、HTML 區塊／註解、以標題開頭的 list item 或 GFM 表格儲存格配對；`` \` `` 被當 code span 分隔；縮排 ```` ``` ````、list item 內的 fence、`>` 後接 tab 的 fence 被誤判。 | 已修 `2bd91a54`（2026-11-21）：改用 markdown-it-py 4.2.0（CommonMark＋GFM 表格，精確釘版於 `requirements-dev.txt`，`dev_check` 先安裝）解析，只檢查 link／image token 與 HTML token 內的 `<img src>`；程式碼由 parser 排除。fence 的原始範圍沒結束在收尾行就回報「沒有收尾」。`test_code_detection_does_not_hide_a_real_link` 11 例中 10 例與 `test_unclosed_fence_fails_instead_of_hiding_the_rest`（原本未收尾 fence 靜默吃到檔尾）在原版失敗（另 1 例留作回歸防線）；`test_code_in_blockquotes_and_spans_is_still_not_a_link` 鎖住不誤報。HTML `<img src>` 維持不檢查（原範圍）。真實文件比對：舊版檢查過的目標一個不少，0 斷連結。 |
 
@@ -35,7 +34,7 @@
 | R-04 | P3 | 上游 workflow 用 `checkout@v2`／Python 3.8 | 刻意不修：靠 repo guard skip。注意 3.8 已裝不起本 fork 的 `scripts/requirements.txt`（見 `AGENTS.md`） |
 | R-05 | P3 | `scripts/requirements.txt` 鎖 2021 pin | **已修** `22e6ec81`（2026-10-10）：改由本 fork 維護並釘現行版；原「上游 3.8 契約」理由作廢，文件於 `6a7a4f45`（2026-11-21）對齊 |
 | R-06 | P3 | `check_links.py` 用檔名過濾，掃不到 `scripts/README.md` | 已修（2026-08-22）：`SKIP_RELATIVE` 比對相對路徑 |
-| R-07 | P3 | `FileNotFoundError`／畸形 `git log` 行不是 `UpstreamCheckError` | 已修（2026-08-22）；行為仍在 canonical 檔，回歸測試現由 `repo-fleet-ops` 擁有（見 F-6） |
+| R-07 | P3 | `FileNotFoundError`／畸形 `git log` 行不是 `UpstreamCheckError` | 已修（2026-08-22）；回歸測試已於 `138d0c9e`（2026-11-24）帶回本 repo（見 F-6） |
 | R-08 | P3 | 相對連結可對 repo 外路徑做 `.exists()` | 已修（2026-08-22）：`is_relative_to(ROOT)` |
 | R-09 | P3 | workflow guard 測試是三檔白名單 | 已修（2026-08-22）：掃全部 `*.yml` |
 | R-10 | P3 | CI 只跑 3.12 | 已修（2026-08-22）：Ubuntu 3.12＋3.14、Windows 3.14 |
