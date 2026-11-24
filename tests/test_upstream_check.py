@@ -1,14 +1,43 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
 import check_upstream_updates as checker  # noqa: E402
+
+
+# R-07: equivalent to repo-fleet-ops tools/canonical/check_upstream_updates_test.py
+# RunnerFailures and test_garbled_git_log_output_is_a_check_error_not_a_crash
+# (canonical revision c1190760483a7da96d135809cd6fe4efe693baf4).
+def test_run_git_wraps_missing_executable() -> None:
+    with mock.patch.object(
+        checker.subprocess, "run", side_effect=FileNotFoundError("git")
+    ), pytest.raises(checker.UpstreamCheckError, match="could not run"):
+        checker.run_git(["status"], Path("."))
+
+
+def test_run_git_wraps_timeout() -> None:
+    with mock.patch.object(
+        checker.subprocess, "run", side_effect=subprocess.TimeoutExpired("git", 1)
+    ), pytest.raises(checker.UpstreamCheckError, match="timed out"):
+        checker.run_git(["fetch"], Path("."))
+
+
+@pytest.mark.parametrize("raw", ["no separators here\n", "sha\x1f2026-11-24\n"])
+def test_garbled_git_log_output_is_a_check_error_not_a_crash(raw: str) -> None:
+    with mock.patch.object(checker, "run_git", return_value=raw) as run:
+        with pytest.raises(checker.UpstreamCheckError, match="unexpected `git log` line"):
+            checker.collect_new_commits({"reviewed_through": "a" * 40}, Path("."), "HEAD")
+    # Reject the malformed record before trying to read files from a bogus commit.
+    assert run.call_count == 1
+    assert run.call_args.args[0][0] == "log"
 
 
 def test_baseline_file_is_valid_and_complete() -> None:
